@@ -1,4 +1,5 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Send } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 
@@ -35,6 +36,90 @@ const Hero = () => {
                 >
                     View demo
                 </Link>
+            </div>
+
+            {/* Floating Chat Interface Visualization */}
+            <div className="max-w-3xl mx-auto relative z-10">
+                <div className="absolute inset-0 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none">
+
+                </div>
+
+                <div className="rounded-2xl p-1 md:p-2 relative overflow-hidden ring-1 ring-white/10 bg-[#0a0a0e] shadow-2xl">
+                    <div className="flex flex-col h-125 md:h-150 w-full bg-[#0a0a0e] rounded-xl overflow-hidden">
+                        <div className="h-14 border-b border-white/5 flex items-center justify-between px-6 bg-[#0E0E12] shrink-0">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="text-sm font-medium text-zinc-300">
+                                Customer Support
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex-1 p-5 md:p-6 overflow-y-auto bg-zinc-950/30 space-y-5 text-left">
+                            {/* Bot message 1 */}
+                            <div className="flex items-start gap-3">
+                                <Image 
+                                    src="/chatbot_profile.png"
+                                    alt="Support Agent"
+                                    className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5"
+                                    width={36}
+                                    height={36}
+                                />
+                                <div className="flex flex-col gap-3">
+                                    <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm leading-relaxed bg-white text-zinc-900 w-fit max-w-xs shadow-sm">
+                                        Hi there, How can I help you today?
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="px-3 py-1.5 rounded-full border border-zinc-700 bg-zinc-800/60 text-zinc-300 text-xs font-medium cursor-default hover:bg-zinc-700/60 transition-colors">
+                                            FAQ
+                                        </span>
+                                        <span className="px-3 py-1.5 rounded-full border border-zinc-700 bg-zinc-800/60 text-zinc-300 text-xs font-medium cursor-default hover:bg-zinc-700/60 transition-colors">
+                                            Pricing
+                                        </span>
+                                        <span className="px-3 py-1.5 rounded-full border border-zinc-700 bg-zinc-800/60 text-zinc-300 text-xs font-medium cursor-default hover:bg-zinc-700/60 transition-colors">
+                                            Support
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* User message */}
+                            <div className="flex items-start gap-3 justify-end">
+                                <div className="px-4 py-2.5 rounded-2xl rounded-tr-sm text-sm leading-relaxed bg-zinc-800 text-zinc-100 w-fit max-w-xs shadow-sm">
+                                    I need some information about your product
+                                </div>
+                                <div className="w-9 h-9 rounded-full bg-zinc-700 shrink-0 mt-0.5 flex items-center justify-center">
+                                    <svg className="w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            {/* Bot message 2 */}
+                            <div className="flex items-start gap-3">
+                                <Image 
+                                    src="/chatbot_profile.png"
+                                    alt="Support Agent"
+                                    className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5"
+                                    width={36}
+                                    height={36}
+                                />
+                                <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm leading-relaxed bg-white text-zinc-900 w-fit max-w-sm shadow-sm">
+                                    Our AI-powered chatbot helps businesses deliver instant, 24/7 customer support with smart responses and seamless integrations.
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-4 bg-[#0A0A0E] border-t border-white/5 shrink-0">
+                            <div className="relative">
+                                <div className="min-h-12.5 w-full px-4 py-3 text-sm bg-zinc-900/50 border border-white/10 rounded-xl text-zinc-500 flex items-center justify-between">
+                                    <span>Type a message ... </span>
+                                    <button className="h-8 w-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-500 cursor-default">
+                                        <Send className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>  
+                    </div>
+                </div>
             </div>
         </div>
     </section>
