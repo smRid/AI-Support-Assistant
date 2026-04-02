@@ -1,5 +1,6 @@
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from 'next/link'
-import React from 'react'
+import { clerkSignInRedirectProps, clerkSignUpRedirectProps } from "@/lib/clerk";
 
 const Navbar = () => {
   return (
@@ -28,18 +29,27 @@ const Navbar = () => {
                 </Link>
 
                 <div className="flex items-center gap-4">
-                    <Link
-                        href="/api/auth"
-                        className="text-xs font-medium text-zinc-400 hover:text-white transition-colors"
-                    >
-                        Sign in
-                    </Link>
-                    <Link
-                        href="/api/auth"
-                        className="text-xs font-medium bg-white text-black px-4 py-2 hover:bg-zinc-200 transition-colors border-white/10 rounded-full"
-                    >
-                        Get started
-                    </Link>
+                    <Show when="signed-out">
+                        <SignInButton {...clerkSignInRedirectProps}>
+                            <a
+                                href="/api/auth?intent=sign-in"
+                                className="text-xs font-medium text-zinc-400 hover:text-white transition-colors"
+                            >
+                                Sign in
+                            </a>
+                        </SignInButton>
+                        <SignUpButton {...clerkSignUpRedirectProps}>
+                            <a
+                                href="/api/auth?intent=sign-up"
+                                className="text-xs font-medium bg-white text-black px-4 py-2 hover:bg-zinc-200 transition-colors border-white/10 rounded-full"
+                            >
+                                Get started
+                            </a>
+                        </SignUpButton>
+                    </Show>
+                    <Show when="signed-in">
+                        <UserButton />
+                    </Show>
                 </div>
             </div>
         </div>

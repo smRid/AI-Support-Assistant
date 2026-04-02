@@ -1,6 +1,7 @@
+import { Show, SignUpButton } from "@clerk/nextjs";
 import { Check } from 'lucide-react'
 import Link from 'next/link'
-import React from 'react'
+import { clerkSignUpRedirectProps } from "@/lib/clerk";
 
 const Pricing = () => {
   return (
@@ -43,12 +44,24 @@ const Pricing = () => {
                         </div>
                     </div>
 
-                    <Link
-                        href="/api/auth"
-                        className="w-full py-3 rounded-full border border-white/15 bg-zinc-800/60 text-white text-sm font-medium text-center hover:bg-zinc-700/60 transition-colors"
-                    >
-                        Start Free
-                    </Link>
+                    <Show when="signed-out">
+                        <SignUpButton {...clerkSignUpRedirectProps}>
+                            <a
+                                href="/api/auth?intent=sign-up"
+                                className="w-full py-3 rounded-full border border-white/15 bg-zinc-800/60 text-white text-sm font-medium text-center hover:bg-zinc-700/60 transition-colors"
+                            >
+                                Start Free
+                            </a>
+                        </SignUpButton>
+                    </Show>
+                    <Show when="signed-in">
+                        <Link
+                            href="/auth/callback"
+                            className="w-full py-3 rounded-full border border-white/15 bg-zinc-800/60 text-white text-sm font-medium text-center hover:bg-zinc-700/60 transition-colors"
+                        >
+                            Continue
+                        </Link>
+                    </Show>
                 </div>
 
                 {/* Pro Plan */}
@@ -87,12 +100,24 @@ const Pricing = () => {
                         </div>
                     </div>
 
-                    <Link
-                        href="/api/auth"
-                        className="w-full py-3 rounded-full bg-white text-black text-sm font-medium text-center hover:bg-zinc-200 transition-colors"
-                    >
-                        Get Started
-                    </Link>
+                    <Show when="signed-out">
+                        <SignUpButton {...clerkSignUpRedirectProps}>
+                            <a
+                                href="/api/auth?intent=sign-up"
+                                className="w-full py-3 rounded-full bg-white text-black text-sm font-medium text-center hover:bg-zinc-200 transition-colors"
+                            >
+                                Get Started
+                            </a>
+                        </SignUpButton>
+                    </Show>
+                    <Show when="signed-in">
+                        <Link
+                            href="/auth/callback"
+                            className="w-full py-3 rounded-full bg-white text-black text-sm font-medium text-center hover:bg-zinc-200 transition-colors"
+                        >
+                            Continue
+                        </Link>
+                    </Show>
                 </div>
             </div>
         </div>

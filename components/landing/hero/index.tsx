@@ -1,7 +1,8 @@
+import { Show, SignUpButton } from "@clerk/nextjs";
 import { ArrowRight, Send } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
+import { clerkSignUpRedirectProps } from "@/lib/clerk";
 
 const Hero = () => {
   return (
@@ -24,12 +25,24 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-                <Link
-                    href="/api/auth"
-                    className="flex items-center gap-2 px-8 py-3 rounded-full bg-white text-black font-medium hover:bg-zinc-200 transition-colors"
-                >
-                    Start for free <ArrowRight className='w-4 h-4'/>
-                </Link>
+                <Show when="signed-out">
+                    <SignUpButton {...clerkSignUpRedirectProps}>
+                        <a
+                            href="/api/auth?intent=sign-up"
+                            className="flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-white text-black font-medium hover:bg-zinc-200 transition-colors"
+                        >
+                            Start for free <ArrowRight className='w-4 h-4'/>
+                        </a>
+                    </SignUpButton>
+                </Show>
+                <Show when="signed-in">
+                    <Link
+                        href="/auth/callback"
+                        className="flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-white text-black font-medium hover:bg-zinc-200 transition-colors"
+                    >
+                        Continue <ArrowRight className='w-4 h-4'/>
+                    </Link>
+                </Show>
                 <Link
                     href="#how-it-works"
                     className="px-8 py-3 rounded-full border border-white/10 bg-white/5 text-white font-medium hover:bg-white/10 transition-colors"
