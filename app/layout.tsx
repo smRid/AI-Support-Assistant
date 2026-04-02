@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} bg-[#ffffff] min-h-screen flex flex-col p-0 antialiased text-zinc-100 font-sans`}>
+      <body className={`${inter.variable} bg-black min-h-screen flex flex-col p-0 antialiased text-zinc-100 font-sans`}>
 
         <div className="fixed inset-0 -z-20 pointer-events-none">
           <div className="w-full h-full opacity-20">
