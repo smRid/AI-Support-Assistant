@@ -3,6 +3,7 @@ import Hero from "@/components/landing/hero";
 import SocialProof from "@/components/landing/social";
 import Features from "@/components/landing/features";
 import Integration from "@/components/landing/integration";
+import Pricing from "@/components/landing/pricing";
 
 const Page = () => {
   return (
@@ -12,6 +13,7 @@ const Page = () => {
       <SocialProof/>
       <Features/>
       <Integration/>
+      <Pricing/>
     </main>
   );
 };
