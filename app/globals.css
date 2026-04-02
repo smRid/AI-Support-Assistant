@@ -6,7 +6,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme *inline* {
+@theme inline {
 
 --font-sans: var(--font-inter);
 
@@ -96,13 +96,13 @@
 
 100% {
 
-**transform**: translateY(0);
+transform: translateY(0);
 
 }
 
 50% {
 
-**transform**: translateY(-8px);
+transform: translateY(-8px);
 
 }
 
@@ -110,19 +110,19 @@
 
 .animate-float {
 
-**animation**: float-gentle 6s *ease-in-out* *infinite*;
+animation: float-gentle 6s ease-in-out infinite;
 
 }
 
 .glass-card {
 
-**background**: rgba(255, 255, 255, 0.02);
+background: rgba(255, 255, 255, 0.02);
 
-**backdrop-filter**: blur(12px);
+backdrop-filter: blur(12px);
 
-**border**: 1px *solid* rgba(255, 255, 255, 0.08);
+border: 1px solid rgba(255, 255, 255, 0.08);
 
-**box-shadow**: 0 4px 30px rgba(0, 0, 0, 0.1);
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 
 }
 
@@ -130,15 +130,15 @@
 
 .no-scrollbar::-webkit-scrollbar {
 
-**display**: *none*;
+display: none;
 
 }
 
 .no-scrollbar {
 
--ms-overflow-style: *none*;
+-ms-overflow-style: none;
 
-**scrollbar-width**: *none*;
+scrollbar-width: none;
 
 }
 
