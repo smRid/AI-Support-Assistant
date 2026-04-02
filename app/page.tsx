@@ -1,9 +1,12 @@
-import React from 'react'
+import Navbar from "@/components/landing/nav";
+import React from "react";
 
-const page = () => {
+const Page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <main className="w-full flex flex-col relative z-10">
+      <Navbar />
+    </main>
+  );
+};
 
-export default page
+export default Page;
