@@ -43,6 +43,12 @@ const Navbar = () => {
                         </Link>
                     </Show>
                     <Show when="signed-in">
+                        <Link
+                            href="/dashboard"
+                            className="text-xs font-medium bg-white text-black px-4 py-2 hover:bg-zinc-200 transition-colors border-white/10 rounded-full"
+                        >
+                            Dashboard
+                        </Link>
                         <UserButton />
                     </Show>
                 </div>

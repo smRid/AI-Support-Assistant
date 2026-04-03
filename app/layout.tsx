@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Inter } from "next/font/google";
+import SessionSync from "@/components/auth/session-sync";
 import "./globals.css";
 
 const inter = Inter({
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} bg-black min-h-screen flex flex-col p-0 antialiased text-zinc-100 font-sans`}>
         <ClerkProvider>
+          <SessionSync />
           <div className="fixed inset-0 -z-20 pointer-events-none">
             <div className="w-full h-full opacity-20">
               <div
