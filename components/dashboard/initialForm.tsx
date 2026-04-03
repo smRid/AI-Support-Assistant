@@ -103,7 +103,7 @@ export default function InitialForm() {
     }
 
     if (currentStep === steps.length - 1) {
-      setIsSubmitting(true);
+      void handleSubmit();
       return;
     }
 
@@ -116,6 +116,34 @@ export default function InitialForm() {
     }
 
     setCurrentStep((previous) => previous - 1);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+
+      const response = await fetch("/api/metadata/store", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          business_name: formData.businessName,
+          website_url: formData.websiteUrl,
+          external_links: formData.externalLinks,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to store metadata.");
+      }
+
+      await response.json();
+      window.location.reload();
+    } catch (error) {
+      console.error("Metadata submit error:", error);
+      setIsSubmitting(false);
+    }
   };
 
   const handleKeyDown = (
