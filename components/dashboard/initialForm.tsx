@@ -1,6 +1,14 @@
 "use client";
 
-import { ChevronLeft, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  ChevronLeft,
+  Globe,
+  LinkIcon,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,6 +25,7 @@ type Step = {
   description: string;
   placeholder: string;
   field: keyof FormData;
+  icon: LucideIcon;
   kind: "input" | "textarea";
   optional?: boolean;
 };
@@ -28,6 +37,7 @@ const steps: Step[] = [
     description: "This will be the identity of your Organization.",
     placeholder: "Acme Inc.",
     field: "businessName",
+    icon: Building2,
     kind: "input",
   },
   {
@@ -36,6 +46,7 @@ const steps: Step[] = [
     description: "We will use this as the primary source of knowledge for your chatbot.",
     placeholder: "https://acme.com",
     field: "websiteUrl",
+    icon: Globe,
     kind: "input",
   },
   {
@@ -44,6 +55,7 @@ const steps: Step[] = [
     description: "Add docs, FAQs, or Notion links to give your assistant more context.",
     placeholder: "https://docs.acme.com\nhttps://notion.so/your-playbook",
     field: "externalLinks",
+    icon: LinkIcon,
     kind: "textarea",
     optional: true,
   },
@@ -60,6 +72,7 @@ export default function InitialForm() {
 
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const step = steps[currentStep];
+  const StepIcon = step.icon;
   const progress = useMemo(
     () => ((currentStep + 1) / steps.length) * 100,
     [currentStep],
@@ -103,6 +116,24 @@ export default function InitialForm() {
     }
 
     setCurrentStep((previous) => previous - 1);
+  };
+
+  const handleKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    if (step.kind === "textarea") {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        event.preventDefault();
+        goNext();
+      }
+
+      return;
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+      goNext();
+    }
   };
 
   return (
@@ -174,23 +205,46 @@ export default function InitialForm() {
               </div>
 
               <div className="space-y-6">
-                {step.kind === "textarea" ? (
-                  <textarea
-                    ref={inputRef as React.Ref<HTMLTextAreaElement>}
-                    value={currentValue}
-                    onChange={(event) => updateField(event.target.value)}
-                    placeholder={step.placeholder}
-                    className="min-h-32 w-full rounded-2xl border border-white/18 bg-black/20 px-5 py-4 text-base text-white outline-none placeholder:text-zinc-600 focus-visible:border-indigo-400/60 focus-visible:ring-3 focus-visible:ring-indigo-500/20"
-                  />
-                ) : (
-                  <input
-                    ref={inputRef as React.Ref<HTMLInputElement>}
-                    value={currentValue}
-                    onChange={(event) => updateField(event.target.value)}
-                    placeholder={step.placeholder}
-                    className="h-14 w-full rounded-2xl border border-white/18 bg-black/20 px-5 text-base text-white outline-none placeholder:text-zinc-600 focus-visible:border-indigo-400/60 focus-visible:ring-3 focus-visible:ring-indigo-500/20"
-                  />
-                )}
+                <div className="relative">
+                  {step.kind === "textarea" ? (
+                    <textarea
+                      ref={inputRef as React.Ref<HTMLTextAreaElement>}
+                      value={currentValue}
+                      onChange={(event) => updateField(event.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder={step.placeholder}
+                      className="min-h-32 w-full rounded-2xl border border-white/18 bg-black/20 px-5 py-4 pr-14 text-base text-white outline-none placeholder:text-zinc-600 focus-visible:border-indigo-400/60 focus-visible:ring-3 focus-visible:ring-indigo-500/20"
+                    />
+                  ) : (
+                    <input
+                      ref={inputRef as React.Ref<HTMLInputElement>}
+                      type={step.field === "websiteUrl" ? "url" : "text"}
+                      value={currentValue}
+                      onChange={(event) => updateField(event.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder={step.placeholder}
+                      className="h-auto w-full rounded-none border-0 border-b border-white/10 bg-transparent py-4 pr-12 text-xl text-white outline-none placeholder:text-zinc-500 transition-colors focus-visible:border-indigo-500 focus-visible:ring-0 md:text-2xl"
+                      autoFocus
+                    />
+                  )}
+                  <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-zinc-600">
+                    <StepIcon className="h-6 w-6" />
+                  </div>
+                </div>
+
+                {/* <div className="flex items-center justify-between pt-8">
+                    <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600">
+                    {step.kind === "textarea" ? (
+                    <>
+                        <Command className="w-3 h-3" />
+                        <span>+ Enter</span>
+                    </>
+                    ) : (
+                    <span>Press Enter ↵</span>
+                    )}
+                    <span className="ml-1">to continue</span>
+                </div>
+                </div> */}
 
                 <div className="flex items-center justify-between gap-4">
                   <p className="text-sm text-zinc-500">
@@ -203,9 +257,19 @@ export default function InitialForm() {
                     type="button"
                     onClick={goNext}
                     disabled={!canContinue}
-                    className="h-11 rounded-full bg-white px-5 text-sm font-semibold text-black hover:bg-zinc-200 disabled:bg-white/10 disabled:text-zinc-500"
+                    className={cn(
+                      "h-12 rounded-full px-6 text-sm font-medium transition-all duration-300",
+                      !canContinue
+                        ? "bg-zinc-800 text-zinc-500 hover:bg-zinc-800 cursor-not-allowed"
+                        : "bg-white text-black hover:bg-zinc-200 hover:shadow-lg hover:shadow-white/10",
+                    )}
                   >
-                    {currentStep === steps.length - 1 ? "Finish setup" : "Continue"}
+                    {currentStep === steps.length - 1 ? "Submit" : "Continue"}
+                    {currentStep === steps.length - 1 ? (
+                      <Sparkles className="ml-2 h-4 w-4" />
+                    ) : (
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
