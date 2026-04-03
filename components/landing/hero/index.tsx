@@ -1,8 +1,7 @@
-import { Show, SignUpButton } from "@clerk/nextjs";
+import { Show } from "@clerk/nextjs";
 import { ArrowRight, Send } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { clerkSignUpRedirectProps } from "@/lib/clerk";
 
 const Hero = () => {
   return (
@@ -26,14 +25,12 @@ const Hero = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
                 <Show when="signed-out">
-                    <SignUpButton {...clerkSignUpRedirectProps}>
-                        <a
-                            href="/api/auth?intent=sign-up"
-                            className="flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-white text-black font-medium hover:bg-zinc-200 transition-colors"
-                        >
-                            Start for free <ArrowRight className='w-4 h-4'/>
-                        </a>
-                    </SignUpButton>
+                    <Link
+                        href="/api/auth?intent=sign-up"
+                        className="flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-white text-black font-medium hover:bg-zinc-200 transition-colors"
+                    >
+                        Start for free <ArrowRight className='w-4 h-4'/>
+                    </Link>
                 </Show>
                 <Show when="signed-in">
                     <Link

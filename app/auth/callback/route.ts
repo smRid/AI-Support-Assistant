@@ -1,5 +1,6 @@
-import { auth } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { syncClerkUser } from "@/db/users";
 
 const defaultSignedInRedirect = "/";
 
@@ -25,9 +26,9 @@ function getSafeRedirectTarget(rawTarget: string | null, requestUrl: URL): URL {
   return new URL(defaultSignedInRedirect, requestUrl);
 }
 
-export async function GET(request: Request) {
-  const { isAuthenticated, redirectToSignIn } = await auth();
-  const requestUrl = new URL(request.url);
+export async function GET(request: NextRequest) {
+  const { isAuthenticated, orgId, redirectToSignIn } = await auth();
+  const requestUrl = request.nextUrl;
 
   if (!isAuthenticated) {
     return redirectToSignIn({
@@ -35,10 +36,39 @@ export async function GET(request: Request) {
     });
   }
 
-  const redirectTarget = getSafeRedirectTarget(
-    requestUrl.searchParams.get("redirect_url") ?? requestUrl.searchParams.get("redirectUrl"),
-    requestUrl,
-  );
+  try {
+    const clerkUser = await currentUser();
 
-  return NextResponse.redirect(redirectTarget);
+    if (!clerkUser) {
+      return NextResponse.json(
+        { error: "Failed to load authenticated user." },
+        { status: 500 },
+      );
+    }
+
+    const redirectTarget = getSafeRedirectTarget(
+      requestUrl.searchParams.get("redirect_url") ?? requestUrl.searchParams.get("redirectUrl"),
+      requestUrl,
+    );
+
+    const userSession = await syncClerkUser(clerkUser, orgId);
+    const response = NextResponse.redirect(redirectTarget);
+
+    response.cookies.set("user_session", JSON.stringify(userSession), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Error syncing authenticated user:", error);
+
+    return NextResponse.json(
+      { error: "Failed to authenticate user" },
+      { status: 500 },
+    );
+  }
 }
