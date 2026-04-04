@@ -33,31 +33,37 @@ const ChatSimulator = ({messages,
   isTyping,
   handleReset,
   scrollRef}: ChatSimulatorProps) => {
+  const displayMessages =
+    messages.length > 0
+      ? messages
+      : [
+          {
+            role: "assistant",
+            content: "Hi there, How can I help you today?",
+          },
+        ];
+
   return (
-    <Card className="flex-1 flex flex-col border-white/5 bg-[#0A0A0E] overflow-hidden relative shadow-2xl">
-        <div className="h-14 border-b border-white/5 flex items-center justify-between px-6 bg-[#0E0E12]">
+    <Card className="relative flex min-h-[480px] flex-1 flex-col overflow-hidden rounded-2xl border-white/5 bg-[#0A0A0E] shadow-2xl">
+        <div className="flex h-14 items-center justify-between border-b border-white/5 bg-[#121216] px-6">
             <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-sm font-medium text-zinc-300">Test Environment</span>
             </div>
             <Button variant="ghost" size="sm" onClick={handleReset} className="h-8 text-zinc-500 hover:text-zinc-300">
-                <RefreshCw className="w-3.5 h-3.5 mr-2" />
+                <RefreshCw className="mr-2 h-3.5 w-3.5" />
                 Reset
             </Button>
         </div>
-        <div className="flex-1 bg-[#0A0A0E] px-6 py-5">
-            <div ref={scrollRef} />
-        </div>
-        <div className="border-t border-white/5 bg-[#0E0E12] p-4">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-                <ScrollArea className="flex-1 p-6 relative bg-zinc-950/30">
-  <div className="space-y-6 pb-4">
-    {messages.map((msg, i) => (
+        <div className="flex flex-1 flex-col bg-[#0A0A0E]">
+            <ScrollArea className="flex-1">
+  <div className="space-y-6 px-5 py-6">
+    {displayMessages.map((msg, i) => (
       <div
         key={i}
         className={cn(
           "flex w-full flex-col",
-          msg.role === "user" ? "items-center" : "items-start"
+          msg.role === "user" ? "items-end" : "items-start"
         )}
       >
         <div
@@ -68,7 +74,7 @@ const ChatSimulator = ({messages,
         >
           <div
             className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center shrink-0 border border-white/5",
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/5",
               msg.role === "user" ? "bg-zinc-800" : "text-white"
             )}
             style={
@@ -80,64 +86,46 @@ const ChatSimulator = ({messages,
             ) : (
               <Bot className="w-4 h-4 text-white" />
             )}
-            </div>
+          </div>
 
             <div className="space-y-2">
               <div
                 className={cn(
-                  "p-4 rounded-2xl text-sm leading-relaxed shadow-sm",
+                  "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm",
                   msg.role === "user"
-                    ? "bg-zinc-800 text-zinc-200 rounded-tr-sm"
-                    : "bg-white text-zinc-900 rounded-tl-sm"
+                    ? "rounded-tr-sm bg-zinc-800 text-zinc-200"
+                    : "rounded-tl-sm bg-white text-zinc-900"
                 )}
               >
                 {msg.content}
               </div>
-
-              {msg.isWelcome && sections.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-1 ml-1 animate-in fade-in slide-in-from-top-1 duration-300">
-                    {msg.isWelcome && sections.length > 0 && (
-                        <div className="flex flex-wrap gap-2 pt-1 ml-1 animate-in f">
-                            {sections.map((section) => (
-                                <button
-                                    key={section.id}
-                                    onClick={() => handleSectionClick(section.name)}
-                                    className="px-3 py-1.5 rounded-full border border-z"
-                                >
-                                    {section.name}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                    {isTyping && (
-                        <div className="flex w-full justify-start">
-                            <div className="flex max-w-[80%] gap-3 flex-row">
-                                <div
-                                    className="w-8 h-8 rounded-full flex items-center justify-center"
-                                    style={{ backgroundColor: primaryColor }}
-                                >
-                                    <Bot className="w-4 h-4 text-white" />
-                                </div>
-                                <div className="p-4 rounded-2xl bg-white text-zinc-900 rounded-tl-sm shadow-sm flex items-center gap-1">
-                                    <div className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                                    <div className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                                    <div className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce" />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-                )}
             </div>
         </div>
       </div>
     ))}
+    {isTyping && (
+      <div className="flex w-full items-start">
+        <div className="flex max-w-[80%] gap-3">
+          <div
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+            style={{ backgroundColor: primaryColor }}
+          >
+            <Bot className="h-4 w-4 text-white" />
+          </div>
+          <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-zinc-900 shadow-sm">
+            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-zinc-400 [animation-delay:-0.3s]" />
+            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-zinc-400 [animation-delay:-0.15s]" />
+            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-zinc-400" />
+          </div>
+        </div>
+      </div>
+    )}
     <div ref={scrollRef} />
   </div>
 </ScrollArea>
 
-<div className="p-4 bg-[#0A0A0E] border-t border-white/5">
-  <div className="relative">
+<div className="border-t border-white/5 bg-[#0E0E12] p-4">
+  <div className="relative rounded-2xl border border-white/5 bg-[#121216]">
     <Textarea
       value={input}
       onChange={(e) => setInput(e.target.value)}
@@ -148,15 +136,17 @@ const ChatSimulator = ({messages,
           ? "Type a message..."
           : "Please select a category above to start..."
       }
-      className="min-h-[50px] max-h-[150px] pr-12 outline-none text-white"
+      className="min-h-[72px] max-h-[160px] resize-none border-0 bg-transparent px-5 py-5 pr-16 text-sm text-white placeholder:text-zinc-500 focus-visible:border-0 focus-visible:ring-0"
     />
     <Button
   size="icon"
   onClick={handleSend}
   disabled={!activeSection || !input.trim()}
   className={cn(
-    "absolute right-2 bottom-2 h-8 w-8 transition-colors",
-    !activeSection || !input.trim() ? "bg-zinc-800 text-zinc-500" : ""
+    "absolute right-4 bottom-4 h-8 w-8 rounded-xl border border-white/5 transition-colors",
+    !activeSection || !input.trim()
+      ? "bg-zinc-800/80 text-zinc-500"
+      : "text-white shadow-lg"
   )}
   style={
     activeSection && input.trim()
@@ -168,7 +158,6 @@ const ChatSimulator = ({messages,
 </Button>
   </div>
 </div>
-            </div>
         </div>
     </Card>
   )

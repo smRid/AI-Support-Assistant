@@ -34,10 +34,47 @@ export default function DashboardChatbotPage() {
     }
   }, [messages, isTyping]);
 
+  useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const metaRes = await fetch("/api/chatbot/metadata/fetch");
+      const metaData = await metaRes.json();
+      setMetadata(metaData);
+
+      if (metaData) {
+        setPrimaryColor(metaData.color || "#4f46e5");
+        setWelcomeMessage(
+          metaData.welcome_message || "Hi! How can I help you?"
+        );
+        setMessages([
+          {
+            role: "assistant",
+            content: metaData.welcome_message || "Hi! How can I help you?",
+            isWelcome: true,
+            section: null,
+          },
+        ]);
+      }
+      const sectionsRes = await fetch("/api/sections/fetch");
+      if (sectionsRes.ok) {
+        const sectionsData = await sectionsRes.json();
+        setSections(sectionsData || []);
+      }
+    } catch (error) {
+      console.error("Error fetching chatbot data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
+}, []);
+
   const handleSend = async () => {};
   const handleKeyDown = async () => {};
   const handleSectionClick = async () => {};
   const handleReset = async () => {};
+
+
 
   return (
     <div className="mx-auto max-w-7xl animate-in space-y-8 p-6 fade-in duration-500 md:p-8">
