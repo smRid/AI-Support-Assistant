@@ -96,7 +96,14 @@ const AddKnowledgeModal = ({
       data.file = uploadedFile;
     }
 
-    await onImport(data);
+    try {
+      await onImport(data);
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to import source."
+      );
+      return;
+    }
 
     setWebsiteUrl("");
     setDocsTitle("");

@@ -15,6 +15,13 @@
       "when": 1775245504633,
       "tag": "0001_panoramic_lyja",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775293132762,
+      "tag": "0002_worried_silverclaw",
+      "breakpoints": true
     }
   ]
 }
