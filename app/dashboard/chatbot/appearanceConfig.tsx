@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { Palette } from "lucide-react";
+import { Palette, Save } from "lucide-react";
 
 interface AppearanceConfigProps {
   primaryColor: string;
@@ -54,8 +56,41 @@ const AppearanceConfig = ({primaryColor,setPrimaryColor,welcomeMessage,setWelcom
             title={color.name}
         />
         ))}
+        <div className="relative w-6 h-6 rounded-full overflow-hidden border-2 border-white/70 ml-2">
+        <input
+            type="color"
+            value={primaryColor}
+            onChange={(e) => setPrimaryColor(e.target.value)}
+            className="absolute -top-2 -left-2 w-10 h-10 p-0 border-0 cursor-pointer"
+        />
+        </div>
     </div>
+    <div className="space-y-3">
+  <Label className="text-zinc-300">Welcome Message</Label>
+  <Textarea
+    value={welcomeMessage}
+    onChange={(e) => setWelcomeMessage(e.target.value)}
+    placeholder="Hi! How can I help you?"
+    className="bg-white/2 border-white/10 text-white resize-none text-sm"
+  />
+</div>
   </div>
+  {hasChanges && (
+  <Button
+    onClick={handleSave}
+    disabled={isSaving}
+    className="w-full bg-white text-black hover:bg-zinc-200"
+  >
+    {isSaving ? (
+      "Saving..."
+    ) : (
+      <>
+        {" "}
+        <Save className="w-4 h-4 mr-2" /> Save Changes{" "}
+      </>
+    )}
+  </Button>
+)}
 </CardContent>
     </Card>
   )
