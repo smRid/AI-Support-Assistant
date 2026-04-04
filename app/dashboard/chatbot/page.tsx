@@ -55,7 +55,7 @@ export default function DashboardChatbotPage() {
           },
         ]);
       }
-      const sectionsRes = await fetch("/api/sections/fetch");
+      const sectionsRes = await fetch("/api/section/fetch");
       if (sectionsRes.ok) {
         const sectionsData = await sectionsRes.json();
         setSections(sectionsData || []);
@@ -70,14 +70,49 @@ export default function DashboardChatbotPage() {
 }, []);
 
   const handleSend = async () => {};
-  const handleKeyDown = async () => {};
-  const handleSectionClick = async () => {};
-  const handleReset = async () => {};
+
+  const handleKeyDown = async (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleSectionClick = async (sectionName: string) => {
+    setActiveSection(sectionName);
+    const userMsg = { role: "user", content: sectionName, section: null };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    setIsTyping(true);
+
+    setTimeout(() => {
+      setIsTyping(false);
+      const aiMsg = {
+        role: "assistant",
+        content: `You can ask me any question related to "${sectionName}"`,
+        section: sectionName,
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+    }, 800);
+
+  };
+  
+  const handleReset = async () => {
+    setActiveSection(null);
+    setMessages([
+      {
+        role: "assistant",
+        content: welcomeMessage,
+        isWelcome: true,
+        section: null,
+      },
+    ]);
+  };
 
 
 
   return (
-    <div className="mx-auto max-w-7xl animate-in space-y-8 p-6 fade-in duration-500 md:p-8">
+    <div className="mx-auto flex h-[calc(100vh-1px)] max-w-7xl animate-in flex-col gap-8 overflow-hidden p-6 fade-in duration-500 md:p-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-white">
           Chatbot Playground
@@ -87,8 +122,8 @@ export default function DashboardChatbotPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-h-0">
-        <div className="lg:col-span-7 flex flex-col h-full min-h-0 space-y-4">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="flex min-h-0 flex-col space-y-4 lg:col-span-7">
           <ChatSimulator
             messages={messages}
             primaryColor={primaryColor}

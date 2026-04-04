@@ -44,7 +44,7 @@ const ChatSimulator = ({messages,
         ];
 
   return (
-    <Card className="relative flex min-h-[480px] flex-1 flex-col overflow-hidden rounded-2xl border-white/5 bg-[#0A0A0E] shadow-2xl">
+    <Card className="relative flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border-white/5 bg-[#0A0A0E] shadow-2xl">
         <div className="flex h-14 items-center justify-between border-b border-white/5 bg-[#121216] px-6">
             <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -55,8 +55,8 @@ const ChatSimulator = ({messages,
                 Reset
             </Button>
         </div>
-        <div className="flex flex-1 flex-col bg-[#0A0A0E]">
-            <ScrollArea className="flex-1">
+        <div className="flex min-h-0 flex-1 flex-col bg-[#0A0A0E]">
+            <ScrollArea className="min-h-0 flex-1 overflow-hidden">
   <div className="space-y-6 px-5 py-6">
     {displayMessages.map((msg, i) => (
       <div
@@ -99,6 +99,25 @@ const ChatSimulator = ({messages,
               >
                 {msg.content}
               </div>
+              {msg.isWelcome && sections.length > 0 ? (
+                <div className="ml-1 flex flex-wrap gap-2 pt-1">
+                  {sections.map((section) => (
+                    <button
+                      key={section.id}
+                      type="button"
+                      onClick={() => handleSectionClick(section.name)}
+                      className={cn(
+                        "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                        activeSection === section.name
+                          ? "border-white/15 bg-white/10 text-white"
+                          : "border-white/10 bg-white/[0.03] text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-200"
+                      )}
+                    >
+                      {section.name}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
         </div>
       </div>
