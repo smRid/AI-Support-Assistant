@@ -1,7 +1,9 @@
 "use client";
 
+import { ScrollArea } from "@/components/ui/scroll-area";
 import ChatSimulator from "./chatSimulator";
 import { useEffect, useRef, useState } from "react";
+import AppearanceConfig from "./appearanceConfig";
 
 interface ChatBotMetadata {
   id: string;
@@ -109,10 +111,17 @@ export default function DashboardChatbotPage() {
     ]);
   };
 
+  const handleSave = async () => {};
+
+const hasChanges = metadata
+  ? primaryColor !== (metadata.color || "#4f46e5") ||
+    welcomeMessage !== (metadata.welcome_message || "Hi! How can I help you?")
+  : false;
+
 
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-1px)] max-w-7xl animate-in flex-col gap-8 overflow-hidden p-6 fade-in duration-500 md:p-8">
+    <div className="mx-auto box-border flex h-[calc(100vh-1px)] min-h-0 max-w-7xl animate-in flex-col gap-8 overflow-hidden p-6 fade-in duration-500 md:p-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-white">
           Chatbot Playground
@@ -138,6 +147,21 @@ export default function DashboardChatbotPage() {
             handleReset={handleReset}
             scrollRef={scrollViewportRef}
           />
+        </div>
+        <div className="lg:col-span-5 h-full min-h-0 overflow-hidden flex flex-col">
+          <ScrollArea className="h-full pr-4">
+            <div className="space-y-6 pb-8">
+              <AppearanceConfig
+                primaryColor={primaryColor}
+                setPrimaryColor={setPrimaryColor}
+                welcomeMessage={welcomeMessage}
+                setWelcomeMessage={setWelcomeMessage}
+                handleSave={handleSave}
+                isSaving={isSaving}
+                hasChanges={hasChanges}
+              />
+            </div>
+          </ScrollArea>
         </div>
       </div>
     </div>
