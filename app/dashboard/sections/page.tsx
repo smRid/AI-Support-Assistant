@@ -1,5 +1,6 @@
 "use client";
 
+import SectionsTable from "@/components/dashboard/sections/sectionsTables";
 import SectionFormFields from "@/components/dashboard/sections/sectionFormFields";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,19 +14,6 @@ import {
 } from "@/components/ui/sheet";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-
-interface Section {
-  id: string;
-  name: string;
-  description: string;
-  sourceCount: number;
-  source_ids?: string[];
-  tone: Tone;
-  scopeLabel: string;
-  allowed_topics?: string;
-  blocked_topics?: string;
-  status: SectionStatus;
-}
 
 const INITIAL_FORM_DATA: SectionFormData = {
   name: "",
@@ -110,13 +98,56 @@ export default function SectionsPage() {
     setIsSheetOpen(true);
   };
 
+  const handlePreviewSection = async (section: Section) => {
+    setSelectedSection(section);
+    setFormData({
+      name: section.name,
+      description: section.description,
+      tone: section.tone,
+      allowedTopics: section.allowed_topics || "",
+      blockedTopics: section.blocked_topics || "",
+      fallbackBehavior: "escalate",
+    });
+    setSelectedSources(section.source_ids || []);
+    setIsSheetOpen(true);
+  };
+
   const handleDeleteSection = async () => {
-    setIsSaving(true);
-    setSelectedSection(null);
-    setSelectedSources([]);
-    setFormData(INITIAL_FORM_DATA);
-    setIsSheetOpen(false);
-    setIsSaving(false);
+    if (!selectedSection || selectedSection.id === "new") {
+      return;
+    }
+
+    if (
+      !confirm(
+        `Are you sure you want to delete "${selectedSection.name}"? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      const response = await fetch("/api/section/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selectedSection.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete section");
+      }
+
+      await fetchSections();
+      setIsSheetOpen(false);
+      setSelectedSection(null);
+      setSelectedSources([]);
+      setFormData(INITIAL_FORM_DATA);
+    } catch (error) {
+      console.error("Failed to delete section:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const fetchSections = async () => {
@@ -205,32 +236,12 @@ export default function SectionsPage() {
 
       <Card className="min-h-[42px] rounded-2xl border border-white/5 bg-[#0A0A0E]">
         <CardContent className="p-0">
-          {isLoadingSections ? (
-            <div className="h-[42px]" />
-          ) : sections.length > 0 ? (
-            <div className="divide-y divide-white/5">
-              {sections.map((section) => (
-                <div
-                  key={section.id}
-                  className="flex items-center justify-between px-4 py-3 text-sm text-zinc-200"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-white">
-                      {section.name}
-                    </p>
-                    <p className="truncate text-xs text-zinc-500">
-                      {section.description}
-                    </p>
-                  </div>
-                  <span className="ml-4 shrink-0 text-xs text-zinc-500">
-                    {section.sourceCount} sources
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="h-[42px]" />
-          )}
+          <SectionsTable
+            sections={sections}
+            isLoading={isLoadingSections}
+            onPreview={handlePreviewSection}
+            onCreateSection={() => void handleCreateSection()}
+          />
         </CardContent>
       </Card>
 
