@@ -122,7 +122,7 @@ const AddKnowledgeModal = ({
   >
     <DialogContent
       showCloseButton={false}
-      className="max-w-[calc(100%-2rem)] sm:max-w-[520px] rounded-2xl border border-white/10 bg-[#121216] p-0 text-zinc-100 shadow-2xl shadow-black/50"
+      className="flex max-h-[calc(100vh-2rem)] max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#121216] p-0 text-zinc-100 shadow-2xl shadow-black/50 sm:max-w-[520px]"
     >
       <DialogHeader className="relative px-5 pt-5 pb-4">
         <DialogTitle className="text-[1.1rem] font-semibold tracking-tight text-white">
@@ -151,7 +151,7 @@ const AddKnowledgeModal = ({
           setDefaultTab(value);
           setError(null);
         }}
-        className="w-full"
+        className="flex min-h-0 w-full flex-1 flex-col"
       >
         <div className="border-b border-white/10 px-5">
           <TabsList
@@ -179,7 +179,7 @@ const AddKnowledgeModal = ({
           </TabsList>
         </div>
 
-        <div className="min-h-[240px] px-5 py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
           {error && (
             <Alert
               variant="destructive"
@@ -268,7 +268,7 @@ const AddKnowledgeModal = ({
               </Label>
               <Textarea
                 placeholder="Paste your FAQs, policy text, or internal notes..."
-                className="min-h-28 cursor-text rounded-lg border-white/10 bg-white/[0.04] text-zinc-100 placeholder:text-zinc-500 focus-visible:border-violet-500/40 focus-visible:ring-violet-500/15"
+                className="min-h-28 max-h-[320px] cursor-text resize-none overflow-y-auto rounded-lg border-white/10 bg-white/[0.04] text-zinc-100 placeholder:text-zinc-500 focus-visible:border-violet-500/40 focus-visible:ring-violet-500/15 [field-sizing:fixed]"
                 value={docsContent}
                 onChange={(e) => setDocsContent(e.target.value)}
               />
