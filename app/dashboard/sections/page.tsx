@@ -38,16 +38,45 @@ const INITIAL_FORM_DATA: SectionFormData = {
 
 export default function SectionsPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [sections, setSections] = useState<Section[]>([]);
   const [selectedSection, setSelectedSection] = useState<Section | null>(null);
   const [formData, setFormData] = useState<SectionFormData>(INITIAL_FORM_DATA);
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingSections, setIsLoadingSections] = useState(true);
   const [knowledgeSources, setKnowledgeSources] = useState<KnowledgeSource[]>(
     []
   );
   const [isLoadingSources, setIsLoadingSources] = useState(true);
 
   useEffect(() => {
+    const fetchSections = async () => {
+      try {
+        setIsLoadingSections(true);
+        const res = await fetch("/api/section/fetch");
+        const data = await res.json();
+
+        const transformedSections: Section[] = data.map((section: any) => ({
+          id: section.id,
+          name: section.name,
+          description: section.description,
+          sourceCount: section.source_ids?.length || 0,
+          source_ids: section.source_ids || [],
+          tone: section.tone as Tone,
+          scopeLabel: section.allowed_topics || "General",
+          allowed_topics: section.allowed_topics,
+          blocked_topics: section.blocked_topics,
+          status: section.status as SectionStatus,
+        }));
+
+        setSections(transformedSections);
+      } catch (error) {
+        console.error("Failed to fetch sections:", error);
+      } finally {
+        setIsLoadingSections(false);
+      }
+    };
+
     const fetchKnowledgeSources = async () => {
       try {
         const res = await fetch("/api/knowledge/fetch", {
@@ -62,6 +91,7 @@ export default function SectionsPage() {
       }
     };
 
+    void fetchSections();
     void fetchKnowledgeSources();
   }, []);
 
@@ -87,6 +117,65 @@ export default function SectionsPage() {
     setFormData(INITIAL_FORM_DATA);
     setIsSheetOpen(false);
     setIsSaving(false);
+  };
+
+  const fetchSections = async () => {
+    try {
+      setIsLoadingSections(true);
+      const res = await fetch("/api/section/fetch");
+      const data = await res.json();
+
+      const transformedSections: Section[] = data.map((section: any) => ({
+        id: section.id,
+        name: section.name,
+        description: section.description,
+        sourceCount: section.source_ids?.length || 0,
+        source_ids: section.source_ids || [],
+        tone: section.tone as Tone,
+        scopeLabel: section.allowed_topics || "General",
+        allowed_topics: section.allowed_topics,
+        blocked_topics: section.blocked_topics,
+        status: section.status as SectionStatus,
+      }));
+
+      setSections(transformedSections);
+    } catch (error) {
+      console.error("Failed to fetch sections:", error);
+    } finally {
+      setIsLoadingSections(false);
+    }
+  };
+
+  const handleSaveSection = async () => {
+    try {
+      setIsSaving(true);
+
+      const sectionData = {
+        ...formData,
+        sourceIds: selectedSources,
+        status: "active",
+      };
+
+      const response = await fetch("/api/section/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sectionData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create section");
+      }
+
+      await fetchSections();
+      setSelectedSection(null);
+      setSelectedSources([]);
+      setFormData(INITIAL_FORM_DATA);
+      setIsSheetOpen(false);
+    } catch (error) {
+      console.error("Failed to save section:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const isPreviewMode = selectedSection?.id !== "new";
@@ -115,7 +204,34 @@ export default function SectionsPage() {
       </div>
 
       <Card className="min-h-[42px] rounded-2xl border border-white/5 bg-[#0A0A0E]">
-        <CardContent className="p-0" />
+        <CardContent className="p-0">
+          {isLoadingSections ? (
+            <div className="h-[42px]" />
+          ) : sections.length > 0 ? (
+            <div className="divide-y divide-white/5">
+              {sections.map((section) => (
+                <div
+                  key={section.id}
+                  className="flex items-center justify-between px-4 py-3 text-sm text-zinc-200"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-white">
+                      {section.name}
+                    </p>
+                    <p className="truncate text-xs text-zinc-500">
+                      {section.description}
+                    </p>
+                  </div>
+                  <span className="ml-4 shrink-0 text-xs text-zinc-500">
+                    {section.sourceCount} sources
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="h-[42px]" />
+          )}
+        </CardContent>
       </Card>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -147,8 +263,12 @@ export default function SectionsPage() {
               </div>
               {isNewSection ? (
                 <SheetFooter className="shrink-0 border-t border-white/5 bg-[#0A0A0E] p-6">
-                  <Button className="h-11 w-full rounded-xl bg-white text-black hover:bg-zinc-200">
-                    Create Section
+                  <Button
+                    className="h-11 w-full rounded-xl bg-white text-black hover:bg-zinc-200"
+                    onClick={() => void handleSaveSection()}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? "Creating..." : "Create Section"}
                   </Button>
                 </SheetFooter>
               ) : null}
