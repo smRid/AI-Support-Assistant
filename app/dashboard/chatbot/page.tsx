@@ -160,7 +160,7 @@ const hasChanges = metadata
                 isSaving={isSaving}
                 hasChanges={hasChanges}
               />
-              <EmbedCodeConfig chatbotId={metadata?.id} />
+              {/* <EmbedCodeConfig chatbotId={metadata?.id} /> */}
             </div>
           </ScrollArea>
         </div>
