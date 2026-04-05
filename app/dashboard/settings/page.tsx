@@ -1,5 +1,6 @@
 "use client"
 
+import TeamSection from '@/components/dashboard/settings/teamSection';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import React, { useEffect, useState } from 'react'
@@ -63,10 +64,21 @@ const Settingspage = () => {
     <div className="grid gap-4 md:grid-cols-2">
       <div className="space-y-2 text-white">
         <Label className="text-zinc-500">Default Language</Label>
+        <div className="p-3 rounded-md bg-white/5 border border-white/5 text-zinc-300 text-sm">
+        English
+      </div>
+      </div>
+      <div className="space-y-2 text-white">
+        <Label className="text-zinc-500">Timezone</Label>
+        <div className="p-3 rounded-md bg-white/5 border border-white/5 text-zinc-300 text-sm">
+        UTC (GMT+6)
+      </div>
       </div>
     </div>
 </CardContent>
 </Card>
+
+    <TeamSection />
 </div>
   )
 }
