@@ -25,6 +25,7 @@ export default function DashboardChatbotPage() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [chatError, setChatError] = useState<string | null>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
 
   const [primaryColor, setPrimaryColor] = useState("#4f46e5");
@@ -72,9 +73,87 @@ export default function DashboardChatbotPage() {
   fetchData();
 }, []);
 
-  const handleSend = async () => {
-    
+const getFriendlyChatErrorMessage = (error: unknown) => {
+  const message = error instanceof Error ? error.message : "";
+
+  if (/quota|billing|429/i.test(message)) {
+    return "Chat is temporarily unavailable because the AI usage limit has been reached. Please try again later or update the API billing.";
+  }
+
+  if (/unauthorized|401/i.test(message)) {
+    return "Your session expired. Please sign in again to continue chatting.";
+  }
+
+  return "I couldn't get a response just now. Please try again in a moment.";
+};
+
+const handleInputChange = (value: string) => {
+  if (chatError) {
+    setChatError(null);
+  }
+
+  setInput(value);
+};
+
+const handleSend = async () => {
+  const trimmedInput = input.trim();
+
+  if (!trimmedInput || !activeSection || isTyping) {
+    return;
+  }
+
+  setChatError(null);
+
+  const currentSection = sections.find((s) => s.name === activeSection);
+  const sourceIds = Array.isArray(currentSection?.source_ids)
+    ? currentSection.source_ids
+    : [];
+
+  const userMsg = {
+    role: "user",
+    content: trimmedInput,
+    section: activeSection,
   };
+  const requestMessages = [...messages, userMsg].map(({ role, content }) => ({
+    role,
+    content,
+  }));
+
+  setMessages((prev) => [...prev, userMsg]);
+  setInput("");
+  setIsTyping(true);
+
+  try {
+    const res = await fetch('/api/chat/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: requestMessages,
+        knowledge_source_ids: sourceIds
+      })
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      throw new Error(
+        typeof errorData?.error === "string"
+          ? errorData.error
+          : "Failed to generate response"
+      );
+    }
+
+    const data = await res.json();
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: data.response, section: null },
+    ]);
+  } catch (error) {
+    setChatError(getFriendlyChatErrorMessage(error));
+  } finally {
+    setIsTyping(false);
+  }
+
+};
 
   const handleKeyDown = async (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -84,6 +163,7 @@ export default function DashboardChatbotPage() {
   };
 
   const handleSectionClick = async (sectionName: string) => {
+    setChatError(null);
     setActiveSection(sectionName);
     const userMsg = { role: "user", content: sectionName, section: null };
     setMessages((prev) => [...prev, userMsg]);
@@ -103,6 +183,7 @@ export default function DashboardChatbotPage() {
   };
   
   const handleReset = async () => {
+    setChatError(null);
     setActiveSection(null);
     setMessages([
       {
@@ -168,12 +249,13 @@ const handleSave = async () => {
             primaryColor={primaryColor}
             sections={sections}
             input={input}
-            setInput={setInput}
+            setInput={handleInputChange}
             handleSend={handleSend}
             handleKeyDown={handleKeyDown}
             handleSectionClick={handleSectionClick}
             activeSection={activeSection}
             isTyping={isTyping}
+            chatError={chatError}
             handleReset={handleReset}
             scrollRef={scrollViewportRef}
           />

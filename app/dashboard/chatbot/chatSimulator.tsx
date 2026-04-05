@@ -17,6 +17,7 @@ interface ChatSimulatorProps {
   handleSectionClick: (name: string) => void;
   activeSection: string | null;
   isTyping: boolean;
+  chatError: string | null;
   handleReset: () => void;
   scrollRef: RefObject<HTMLDivElement | null>;
 }
@@ -31,6 +32,7 @@ const ChatSimulator = ({messages,
   handleSectionClick,
   activeSection,
   isTyping,
+  chatError,
   handleReset,
   scrollRef}: ChatSimulatorProps) => {
   const displayMessages =
@@ -158,17 +160,18 @@ const ChatSimulator = ({messages,
       className="min-h-0 max-h-[120px] resize-none overflow-y-auto border-0 bg-transparent px-0 py-0 pr-16 text-[15px] leading-6 text-white placeholder:text-zinc-500 focus-visible:border-0 focus-visible:ring-0 disabled:bg-transparent disabled:opacity-100"
     />
     <Button
+  variant="ghost"
   size="icon"
   onClick={handleSend}
-  disabled={!activeSection || !input.trim()}
+  disabled={isTyping || !activeSection || !input.trim()}
   className={cn(
-    "absolute top-1/2 right-3 h-10 w-10 -translate-y-1/2 rounded-xl border border-white/10 transition-colors",
-    !activeSection || !input.trim()
-      ? "bg-[#24242b] text-zinc-500"
-      : "text-white shadow-lg"
+    "absolute top-1/2 right-3 h-10 w-10 -translate-y-1/2 rounded-xl border transition-all disabled:opacity-100",
+    isTyping || !activeSection || !input.trim()
+      ? "border-white/10 bg-[#24242b] text-zinc-500"
+      : "border-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.28)] hover:scale-[1.02] hover:brightness-110"
   )}
   style={
-    activeSection && input.trim()
+    !isTyping && activeSection && input.trim()
       ? { backgroundColor: primaryColor, color: "white" }
       : {}
   }
@@ -176,6 +179,11 @@ const ChatSimulator = ({messages,
   <Send className="w-4 h-4" />
 </Button>
   </div>
+  {chatError ? (
+    <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm leading-5 text-amber-100">
+      {chatError}
+    </div>
+  ) : null}
 </div>
         </div>
     </Card>
