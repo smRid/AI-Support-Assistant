@@ -4,6 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import ChatSimulator from "./chatSimulator";
 import { useEffect, useRef, useState } from "react";
 import AppearanceConfig from "./appearanceConfig";
+import EmbedCodeConfig from "./embedCodeConfig";
 
 interface ChatBotMetadata {
   id: string;
@@ -160,7 +161,7 @@ const hasChanges = metadata
                 isSaving={isSaving}
                 hasChanges={hasChanges}
               />
-              {/* <EmbedCodeConfig chatbotId={metadata?.id} /> */}
+              <EmbedCodeConfig chatbotId={metadata?.id} />
             </div>
           </ScrollArea>
         </div>
