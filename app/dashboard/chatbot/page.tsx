@@ -72,7 +72,9 @@ export default function DashboardChatbotPage() {
   fetchData();
 }, []);
 
-  const handleSend = async () => {};
+  const handleSend = async () => {
+    
+  };
 
   const handleKeyDown = async (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {

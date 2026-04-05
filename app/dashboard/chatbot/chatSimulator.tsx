@@ -144,27 +144,27 @@ const ChatSimulator = ({messages,
 </ScrollArea>
 
 <div className="border-t border-white/5 bg-[#0E0E12] p-4">
-  <div className="relative rounded-2xl border border-white/5 bg-[#121216]">
+  <div className="relative rounded-2xl border border-white/10 bg-[#141418] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-colors focus-within:border-white/20 focus-within:ring-2 focus-within:ring-white/10">
     <Textarea
+      rows={1}
       value={input}
       onChange={(e) => setInput(e.target.value)}
       onKeyDown={handleKeyDown}
-      disabled={!activeSection}
       placeholder={
         activeSection
           ? "Type a message..."
-          : "Please select a category above to start..."
+          : "Type a message or choose a category above..."
       }
-      className="min-h-[72px] max-h-[160px] resize-none border-0 bg-transparent px-5 py-5 pr-16 text-sm text-white placeholder:text-zinc-500 focus-visible:border-0 focus-visible:ring-0"
+      className="min-h-0 max-h-[120px] resize-none overflow-y-auto border-0 bg-transparent px-0 py-0 pr-16 text-[15px] leading-6 text-white placeholder:text-zinc-500 focus-visible:border-0 focus-visible:ring-0 disabled:bg-transparent disabled:opacity-100"
     />
     <Button
   size="icon"
   onClick={handleSend}
   disabled={!activeSection || !input.trim()}
   className={cn(
-    "absolute right-4 bottom-4 h-8 w-8 rounded-xl border border-white/5 transition-colors",
+    "absolute top-1/2 right-3 h-10 w-10 -translate-y-1/2 rounded-xl border border-white/10 transition-colors",
     !activeSection || !input.trim()
-      ? "bg-zinc-800/80 text-zinc-500"
+      ? "bg-[#24242b] text-zinc-500"
       : "text-white shadow-lg"
   )}
   style={
