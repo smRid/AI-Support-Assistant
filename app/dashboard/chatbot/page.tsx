@@ -112,14 +112,41 @@ export default function DashboardChatbotPage() {
     ]);
   };
 
-  const handleSave = async () => {};
+const handleSave = async () => {
+  setIsSaving(true);
+  try {
+    const res = await fetch("/api/chatbot/metadata/update", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        color: primaryColor,
+        welcome_message: welcomeMessage,
+      }),
+    });
 
-const hasChanges = metadata
+    if (res.ok) {
+      const updated = await res.json();
+      setMetadata(updated);
+    } else {
+      console.error("Failed to save changes");
+    }
+  } catch (error) {
+    console.error("Failed to save:", error);
+  } finally {
+    setIsSaving(false);
+  }
+};
+
+  const hasChanges = metadata
   ? primaryColor !== (metadata.color || "#4f46e5") ||
     welcomeMessage !== (metadata.welcome_message || "Hi! How can I help you?")
   : false;
 
-
+  if (loading) {
+    return (
+      <div className="p-8 text-zinc-500">Loading chatbot configuration...</div>
+    );
+  }
 
   return (
     <div className="mx-auto box-border flex h-[calc(100vh-1px)] min-h-0 max-w-7xl animate-in flex-col gap-8 overflow-hidden p-6 fade-in duration-500 md:p-8">
