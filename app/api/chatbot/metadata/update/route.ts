@@ -1,7 +1,8 @@
 import { db } from "@/db/client";
 import { chatBotMetadata } from "@/db/schema";
 import { isAuthorized } from "@/lib/isAuthorized";
-import { eq } from "drizzle-orm";
+import { getWorkspaceContext } from "@/lib/workspace";
+import { asc, eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function PUT(req: Request) {
@@ -11,6 +12,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const workspace = await getWorkspaceContext(user);
     const body = await req.json();
     const color =
       typeof body.color === "string" ? body.color.trim() : "";
@@ -29,14 +31,15 @@ export async function PUT(req: Request) {
     const [existingMetadata] = await db
       .select({ id: chatBotMetadata.id })
       .from(chatBotMetadata)
-      .where(eq(chatBotMetadata.user_email, user.email))
+      .where(inArray(chatBotMetadata.user_email, workspace.memberEmails))
+      .orderBy(asc(chatBotMetadata.created_at))
       .limit(1);
 
     if (!existingMetadata) {
       const [createdMetadata] = await db
         .insert(chatBotMetadata)
         .values({
-          user_email: user.email,
+          user_email: workspace.ownerEmail,
           color,
           welcome_message,
         })
@@ -51,7 +54,7 @@ export async function PUT(req: Request) {
         color,
         welcome_message,
       })
-      .where(eq(chatBotMetadata.user_email, user.email))
+      .where(eq(chatBotMetadata.id, existingMetadata.id))
       .returning();
 
     if (!updatedMetadata) {

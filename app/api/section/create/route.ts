@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { sections } from "@/db/schema";
 import { isAuthorized } from "@/lib/isAuthorized";
+import { getWorkspaceContext } from "@/lib/workspace";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -10,6 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const workspace = await getWorkspaceContext(user);
     const body = await req.json();
 
     const { name, description, tone, allowedTopics, blockedTopics, sourceIds } = body;
@@ -26,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
 
     const section = await db.insert(sections).values({
-        user_email: user.email,
+        user_email: workspace.ownerEmail,
         name,
         description,
         source_ids: sourceIds,

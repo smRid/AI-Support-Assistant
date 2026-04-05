@@ -2,7 +2,8 @@ import { db } from "@/db/client";
 import { knowledge_source } from "@/db/schema";
 import { isAuthorized } from "@/lib/isAuthorized";
 import { summarizeMarkdown } from "@/lib/openAI";
-import { and, eq, sql } from "drizzle-orm";
+import { getWorkspaceContext } from "@/lib/workspace";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -354,6 +355,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const workspace = await getWorkspaceContext(user);
     await ensureKnowledgeSourcesTable();
 
     const contentType = req.headers.get("content-type") || "";
@@ -386,7 +388,7 @@ export async function POST(req: NextRequest) {
       const [createdSource] = await db
         .insert(knowledge_source)
         .values({
-          user_email: user.email,
+          user_email: workspace.ownerEmail,
           type: "upload",
           name: file.name,
           status: "active",
@@ -426,7 +428,7 @@ export async function POST(req: NextRequest) {
         .from(knowledge_source)
         .where(
           and(
-            eq(knowledge_source.user_email, user.email),
+            inArray(knowledge_source.user_email, workspace.memberEmails),
             eq(knowledge_source.type, "website"),
             eq(knowledge_source.source_url, body.url)
           )
@@ -496,7 +498,7 @@ export async function POST(req: NextRequest) {
       const [createdSource] = await db
         .insert(knowledge_source)
         .values({
-          user_email: user.email,
+          user_email: workspace.ownerEmail,
           type: "website",
           name: body.url,
           status: "active",
@@ -524,7 +526,7 @@ export async function POST(req: NextRequest) {
       const [createdSource] = await db
         .insert(knowledge_source)
         .values({
-          user_email: user.email,
+          user_email: workspace.ownerEmail,
           type: "text",
           name: body.title.trim(),
           status: "active",

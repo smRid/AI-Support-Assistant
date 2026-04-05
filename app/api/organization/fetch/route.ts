@@ -1,7 +1,8 @@
 import { db } from "@/db/client";
 import { metadata } from "@/db/schema";
 import { isAuthorized } from "@/lib/isAuthorized";
-import { eq } from "drizzle-orm";
+import { getWorkspaceContext } from "@/lib/workspace";
+import { asc, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -11,13 +12,16 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const workspace = await getWorkspaceContext(user);
     const [metadataRecord] = await db
     .select()
     .from(metadata)
-    .where(eq(metadata.user_email, user.email));
+    .where(inArray(metadata.user_email, workspace.memberEmails))
+    .orderBy(asc(metadata.created_at))
+    .limit(1);
 
     const organization = {
-    ...(metadataRecord || []),
+    ...(metadataRecord || {}),
     id: user.organization_id,
     };
 

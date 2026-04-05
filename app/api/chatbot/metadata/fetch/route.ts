@@ -1,7 +1,8 @@
 import { db } from "@/db/client";
 import { chatBotMetadata } from "@/db/schema";
 import { isAuthorized } from "@/lib/isAuthorized";
-import { eq } from "drizzle-orm";
+import { getWorkspaceContext } from "@/lib/workspace";
+import { asc, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -11,12 +12,18 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const [existingMetadata] = await db.select().from(chatBotMetadata).where(eq(chatBotMetadata.user_email, user.email));
+    const workspace = await getWorkspaceContext(user);
+    const [existingMetadata] = await db
+      .select()
+      .from(chatBotMetadata)
+      .where(inArray(chatBotMetadata.user_email, workspace.memberEmails))
+      .orderBy(asc(chatBotMetadata.created_at))
+      .limit(1);
 
 
     if (!existingMetadata) {
       const [newMetadata] = await db.insert(chatBotMetadata).values({
-        user_email: user.email!,
+        user_email: workspace.ownerEmail,
       }).returning();
     return NextResponse.json( newMetadata,{status:200 });
     }

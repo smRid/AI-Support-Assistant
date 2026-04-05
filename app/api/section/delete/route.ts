@@ -1,7 +1,8 @@
 import { db } from "@/db/client";
 import { sections } from "@/db/schema";
 import { isAuthorized } from "@/lib/isAuthorized";
-import { and, eq } from "drizzle-orm";
+import { getWorkspaceContext } from "@/lib/workspace";
+import { and, eq, inArray } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(req: NextRequest) {
@@ -12,6 +13,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const workspace = await getWorkspaceContext(user);
     const { id } = await req.json();
 
     if (!id) {
@@ -24,7 +26,12 @@ export async function DELETE(req: NextRequest) {
     const existingSection = await db
       .select()
       .from(sections)
-      .where(and(eq(sections.id, id), eq(sections.user_email, user.email)));
+      .where(
+        and(
+          eq(sections.id, id),
+          inArray(sections.user_email, workspace.memberEmails),
+        ),
+      );
 
     if (existingSection.length === 0) {
       return NextResponse.json(
@@ -35,7 +42,12 @@ export async function DELETE(req: NextRequest) {
 
     const response = await db
       .delete(sections)
-      .where(and(eq(sections.id, id), eq(sections.user_email, user.email)));
+      .where(
+        and(
+          eq(sections.id, id),
+          inArray(sections.user_email, workspace.memberEmails),
+        ),
+      );
 
     return NextResponse.json(
       {

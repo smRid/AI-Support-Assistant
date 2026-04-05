@@ -3,7 +3,8 @@ import { knowledge_source } from "@/db/schema";
 import { countConversationTokens } from "@/lib/countConversationTokens";
 import { isAuthorized } from "@/lib/isAuthorized";
 import { openai, summarizeConversation } from "@/lib/openAI";
-import { inArray } from "drizzle-orm";
+import { getWorkspaceContext } from "@/lib/workspace";
+import { and, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -12,6 +13,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const workspace = await getWorkspaceContext(user);
   let { messages, knowledge_source_ids } = await req.json();
 
   let context = ""
@@ -22,7 +24,12 @@ export async function POST(req: Request) {
       content: knowledge_source.content,
     })
     .from(knowledge_source)
-    .where(inArray(knowledge_source.id, knowledge_source_ids));
+    .where(
+      and(
+        inArray(knowledge_source.id, knowledge_source_ids),
+        inArray(knowledge_source.user_email, workspace.memberEmails),
+      ),
+    );
 
     context = sources
       .map((s) => s.content)

@@ -1,7 +1,8 @@
 import { db } from "@/db/client";
 import { sections } from "@/db/schema";
 import { isAuthorized } from "@/lib/isAuthorized";
-import { eq } from "drizzle-orm";
+import { getWorkspaceContext } from "@/lib/workspace";
+import { inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -11,7 +12,11 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const response = await db.select().from(sections).where(eq(sections.user_email, user.email));
+    const workspace = await getWorkspaceContext(user);
+    const response = await db
+      .select()
+      .from(sections)
+      .where(inArray(sections.user_email, workspace.memberEmails));
 
     return NextResponse.json(response, {status: 200}) 
 

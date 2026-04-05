@@ -1,7 +1,8 @@
 import { db } from "@/db/client";
 import { knowledgeSources } from "@/db/schema";
 import { isAuthorized } from "@/lib/isAuthorized";
-import { desc, eq, sql } from "drizzle-orm";
+import { getWorkspaceContext } from "@/lib/workspace";
+import { desc, inArray, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 async function ensureKnowledgeSourcesTable() {
@@ -29,12 +30,13 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const workspace = await getWorkspaceContext(user);
     await ensureKnowledgeSourcesTable();
 
     const sources = await db
       .select()
       .from(knowledgeSources)
-      .where(eq(knowledgeSources.user_email, user.email))
+      .where(inArray(knowledgeSources.user_email, workspace.memberEmails))
       .orderBy(desc(knowledgeSources.created_at));
 
     return NextResponse.json({ sources }, { status: 200 });
