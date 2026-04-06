@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { AlertCircle, Bot, ChevronDown, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
@@ -110,6 +111,25 @@ fetchConfig();
 
 }, [])
 
+const handleSectionClick = (sectionName: string) => {
+  setActiveSection(sectionName);
+  const userMsg = { role: "user", content: sectionName, section: null };
+  setMessages((prev) => [...prev, userMsg]);
+  setInput("");
+  setIsTyping(true);
+
+  setTimeout(() => {
+  setIsTyping(false);
+  const aiMsg = {
+    role: "assistant",
+    content: `You can ask me any question related to "${sectionName}"`,
+    section: sectionName,
+  };
+  setMessages((prev) => [...prev, aiMsg]);
+}, 800);
+
+};
+
 useEffect(() => {
   if (scrollViewportRef.current) {
     scrollViewportRef.current.scrollIntoView({ behavior: "smooth" });
@@ -128,6 +148,10 @@ const handleKeyDown = (e: React.KeyboardEvent) => {
 };
 
 const primaryColor = metadata?.color || "#4f46e5";
+const visibleSections =
+  sections.length > 0
+    ? sections
+    : [{ id: "fallback-faq", name: "FAQ", source_ids: [] }];
 
 if(loading) return null;
 if(error && isOpen){
@@ -224,6 +248,24 @@ return (
                 >
                   {msg.content}
                 </div>
+                {msg.isWelcome && visibleSections.length > 0 && (
+  <div className="ml-1 flex flex-col items-start gap-2 pt-2">
+    {visibleSections.map((section) => (
+      <button
+key={section.id}
+onClick={() => handleSectionClick(section.name)}
+className={cn(
+  "text-left text-base font-medium leading-none transition-colors",
+  activeSection === section.name
+    ? "text-white"
+    : "text-zinc-100 hover:text-white"
+)}
+>
+        {section.name}
+      </button>
+    ))}
+  </div>
+)}
               </div>
             </div>
           </div>
