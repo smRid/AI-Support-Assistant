@@ -1,6 +1,7 @@
 'use client'
 
-import { AlertCircle, Bot, MessageCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { AlertCircle, Bot, ChevronDown, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react'
@@ -152,22 +153,84 @@ if (!isOpen) {
 
 return (
   <div className="flex flex-col h-screen bg-[#0A0A0E] overflow-hidden rounded-xl border border-white/10 shadow-2xl">
-    <div className="h-14 border-b border-white/5 flex items-center justify-between px-4 bg-[#0E0E12] shadow-sm shrink-0 z-20">
-        <div className="flex items-center gap-3">
-  <div className="relative">
-     <div className="flex items-start gap-3">
-      <Image 
-          src="/chatbot_profile.png"
-          alt="Support Agent"
-          className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5"
-          width={36}
-          height={36}
-      />
+    <div className="z-20 flex h-16 items-center justify-between border-b border-white/5 bg-[#0E0E12] px-5 shadow-sm shrink-0">
+      <div className="flex items-center gap-3">
+        <div className="relative shrink-0">
+          <Image
+            src="/chatbot_profile.png"
+            alt="Support Agent"
+            className="h-10 w-10 rounded-full object-cover"
+            width={40}
+            height={40}
+          />
+          <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#0E0E12] bg-emerald-500"></div>
+        </div>
+
+        <div className="flex flex-col justify-center">
+          <h1 className="text-sm font-semibold leading-none text-white">
+            Support
+          </h1>
+          <span className="mt-1 text-xs font-medium leading-none text-emerald-400">
+            Online
+          </span>
+        </div>
+      </div>
+
+      <button
+        onClick={toggleOpen}
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+        aria-label="Minimize Chat"
+      >
+        <ChevronDown className="h-5 w-5" />
+      </button>
     </div>
-    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border border-[#0A0A0E]"></div>
+    <div className="flex-1 min-h-0 overflow-y-auto bg-zinc-950/30 p-4">
+  <div className="space-y-6 pb-4">
+{messages.map((msg, i) => (
+  <div
+    key={i}
+    className={cn(
+      "flex w-full flex-col",
+      msg.role === "user" ? "items-end" : "items-start"
+    )}
+  >
+<div
+  className={cn(
+    "flex max-w-[85%] gap-3",
+    msg.role === "user" ? "flex-row-reverse" : "flex-row"
+  )}
+>
+{msg.role !== "user" && (
+  <div className="shrink-0">
+    <Image
+      src="/chatbot_profile.png"
+      alt="Support Agent"
+      className="h-8 w-8 rounded-full object-cover"
+      width={32}
+      height={32}
+    />
+    <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#0E0E12] bg-emerald-500"></div>
+  </div>
+  
+)}
+</div>
+  </div>
+))}
+
+<div className='space-y-'>
+  <div
+  className={cn(
+    "p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm",
+    msg.role === "user"
+      ? "bg-zinc-800 text-zinc-100 rounded-tr-sm"
+      : "bg-white text-zinc-900 rounded-tl-sm"
+  )}
+>
+  {msg.content}
+</div>
+</div>
   </div>
 </div>
-    </div>
   </div>
 );
 };
