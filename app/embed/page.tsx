@@ -184,53 +184,54 @@ return (
         <ChevronDown className="h-5 w-5" />
       </button>
     </div>
-    <div className="flex-1 min-h-0 overflow-y-auto bg-zinc-950/30 p-4">
-  <div className="space-y-6 pb-4">
-{messages.map((msg, i) => (
-  <div
-    key={i}
-    className={cn(
-      "flex w-full flex-col",
-      msg.role === "user" ? "items-end" : "items-start"
-    )}
-  >
-<div
-  className={cn(
-    "flex max-w-[85%] gap-3",
-    msg.role === "user" ? "flex-row-reverse" : "flex-row"
-  )}
->
-{msg.role !== "user" && (
-  <div className="shrink-0">
-    <Image
-      src="/chatbot_profile.png"
-      alt="Support Agent"
-      className="h-8 w-8 rounded-full object-cover"
-      width={32}
-      height={32}
-    />
-    <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#0E0E12] bg-emerald-500"></div>
-  </div>
-  
-)}
-</div>
-  </div>
-))}
+    <div className="min-h-0 flex-1 overflow-y-auto bg-zinc-950/30 px-4 py-5">
+      <div className="space-y-5 pb-4">
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            className={cn(
+              "flex w-full",
+              msg.role === "user" ? "justify-end" : "justify-start"
+            )}
+          >
+            <div
+              className={cn(
+                "flex max-w-[88%] items-start gap-3",
+                msg.role === "user" ? "flex-row-reverse" : "flex-row"
+              )}
+            >
+              {msg.role !== "user" ? (
+                <div className="relative mt-0.5 shrink-0">
+                  <Image
+                    src="/chatbot_profile.png"
+                    alt="Support Agent"
+                    className="h-8 w-8 rounded-full object-cover"
+                    width={40}
+                    height={40}
+                  />
+                  <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[#0A0A0E] bg-emerald-500"></div>
+                </div>
+              ) : null}
 
-<div className='space-y-'>
-  <div
-  className={cn(
-    "p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm",
-    msg.role === "user"
-      ? "bg-zinc-800 text-zinc-100 rounded-tr-sm"
-      : "bg-white text-zinc-900 rounded-tl-sm"
-  )}
->
-  {msg.content}
-</div>
-</div>
-  </div>
-</div>
+              <div className="space-y-2">
+                <div
+                  className={cn(
+                    "w-fit max-w-[240px] rounded-3xl px-4 py-3 text-sm leading-relaxed shadow-sm",
+                    msg.role === "user"
+                      ? "rounded-tr-md bg-zinc-800 text-zinc-100"
+                      : "rounded-tl-md bg-white text-zinc-900"
+                  )}
+                >
+                  {msg.content}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div ref={scrollViewportRef} />
+      </div>
+    </div>
   </div>
 );
 };
