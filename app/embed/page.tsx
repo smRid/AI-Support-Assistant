@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertCircle, Bot, MessageCircle } from 'lucide-react';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react'
 
@@ -154,8 +155,14 @@ return (
     <div className="h-14 border-b border-white/5 flex items-center justify-between px-4 bg-[#0E0E12] shadow-sm shrink-0 z-20">
         <div className="flex items-center gap-3">
   <div className="relative">
-    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5">
-      <Bot className="w-4 h-4" />
+     <div className="flex items-start gap-3">
+      <Image 
+          src="/chatbot_profile.png"
+          alt="Support Agent"
+          className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5"
+          width={36}
+          height={36}
+      />
     </div>
     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border border-[#0A0A0E]"></div>
   </div>
