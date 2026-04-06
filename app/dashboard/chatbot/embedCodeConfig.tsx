@@ -8,7 +8,7 @@ const EmbedCodeConfig = ({chatbotId}:{chatbotId:string | undefined}) => {
 
   const handleCopyCode = () => {
   setCopied(true);
-  navigator.clipboard.writeText(`<script src="https://oneminutestack.com/widget.js" data-id="${chatbotId}" defer></script>`);
+  navigator.clipboard.writeText(`<script src="http://localhost:3000/widget.js" data-id="${chatbotId}" defer></script>`);
   setTimeout(() => setCopied(false), 2000);
 };
 
@@ -27,7 +27,7 @@ const EmbedCodeConfig = ({chatbotId}:{chatbotId:string | undefined}) => {
         <div className="overflow-hidden rounded-2xl border border-white/8 bg-[#06060A] px-5 py-4">
           <pre className="overflow-x-auto whitespace-pre-wrap break-all">
             <code className="block font-mono text-xs leading-6 text-zinc-400">
-              {`<script src="https://oneminutestack.com/widget.js" \n data-id="${chatbotId || "..."}"\n  defer>\n</script>`}
+              {`<script src="http://localhost:3000/widget.js" \n data-id="${chatbotId || "..."}"\n  defer>\n</script>`}
             </code>
           </pre>
         </div>

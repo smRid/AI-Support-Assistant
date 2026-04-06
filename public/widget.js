@@ -23,6 +23,8 @@
     })
       .then(function (res) {
         if (!res.ok) throw new Error("Failed to create session");
+
+        return res.json();
       })
       .then(function (data) {
         if (!data || !data.token) {
