@@ -2,6 +2,7 @@ import { chatBotMetadata } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { SignJWT } from 'jose';
+import { db } from "@/db/client";
 
 
 export async function POST(req: Request) {
