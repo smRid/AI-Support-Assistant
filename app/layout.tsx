@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Inter } from "next/font/google";
 import SessionSync from "@/components/auth/session-sync";
 import "./globals.css";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Customer Chatbot",
@@ -21,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} bg-black min-h-screen flex flex-col p-0 antialiased text-zinc-100 font-sans`}>
+      <body className="bg-black min-h-screen flex flex-col p-0 antialiased text-zinc-100 font-sans">
         <ClerkProvider>
           <SessionSync />
           <div className="fixed inset-0 -z-20 pointer-events-none">

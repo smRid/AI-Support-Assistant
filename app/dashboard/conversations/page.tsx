@@ -3,8 +3,8 @@
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Loader2, Search } from 'lucide-react';
-import React, { useRef, useState } from 'react'
+import { Loader2, Search, User } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react'
 
 interface Message {
   id: string;
@@ -35,11 +35,61 @@ const ConversationPage = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+useEffect(() => {
+  const fetchConversations = async () => {
+    try {
+      const res = await fetch("/api/conversations");
+      const data = await res.json();
+      setConversations(data.conversations || []);
+    } catch (error) {
+      console.error("Failed to fetch conversations", error);
+    } finally {
+      setIsLoadingList(false);
+    }
+  };
+
+  fetchConversations();
+}, []);
+
+useEffect(() => {
+  if (!selectedId) return;
+
+  const fetchMessages = async () => {
+    setIsLoadingMessages(true);
+
+    try {
+  const res = await fetch(`/api/conversations/${selectedId}/messages`);
+  const data = await res.json();
+  setCurrentMessages(data.messages || []);
+} catch (error) {
+  console.error("Failed to fetch messages", error);
+} finally {
+  setIsLoadingMessages(false);
+}
+  }
+  fetchMessages();
+}, [selectedId]);
+
+useEffect(() => {
+  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [currentMessages, isLoadingMessages]);
+
+const handleSendReply = async () => {};
+
+const handleKeyDown = (e: React.KeyboardEvent) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    handleSendReply();
+  }
+};
+
   const filteredConversations = conversations.filter(
     (c) =>
         c.user?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.lastMessage?.toLowerCase().includes(searchQuery.toLowerCase())
 );
+
+const selectedConv = conversations?.find((c) => c.id === selectedId);
 
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-black animate-in fade-in duration-500">
@@ -108,8 +158,22 @@ const ConversationPage = () => {
 </ScrollArea>
       </div>
       <div className="flex-1 flex flex-col min-w-0 bg-[#0a0a0e]">
+      {selectedConv ? (
+        <>
+          <div className="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-[#0E0E12]">  
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
+              <User className="w-4 h-4 text-zinc-400" />
+            </div>
+          </div>
+          
+          </div>
+        </>
+      ) : (
+        <> </>
+      )}
 
-</div>
+      </div>
     </div>
   )
 }
