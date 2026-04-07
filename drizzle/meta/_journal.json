@@ -43,6 +43,13 @@
       "when": 1775379755630,
       "tag": "0005_dizzy_abomination",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1775544670190,
+      "tag": "0006_low_the_hunter",
+      "breakpoints": true
     }
   ]
 }

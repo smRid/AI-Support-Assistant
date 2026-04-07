@@ -39,7 +39,7 @@ export const knowledgeSources = pgTable("knowledge_source", {
   created_at: text("created_at").default(sql`now()`),
 });
 
-export const knowledge_source = knowledgeSources;
+// export const knowledge_source = knowledgeSources;
 
 
 export const sections = pgTable("sections", {
@@ -78,5 +78,38 @@ export const teamMembers = pgTable("team_members", {
   organization_id: text("organization_id").notNull(),
   role: text("role").notNull().default("member"),
   status: text("status").notNull().default("pending"),
+  created_at: text("created_at").default(sql`now()`),
+});
+
+
+export const conversation = pgTable("conversation", {
+  id: text("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  user_email: text("user_email"),
+  visitor_ip: text("visitor_ip"),
+  name: text("name"),
+  chatbot_id: text("chatbot_id").notNull(),
+  created_at: text("created_at").default(sql`now()`),
+});
+
+export const messages = pgTable("messages", {
+  id: text("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  conversation_id: text("conversation_id").notNull(),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  created_at: text("created_at").default(sql`now()`),
+});
+
+export const widgets = pgTable("widgets", {
+  id: text("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  organization_id: text("organization_id").notNull(),
+  name: text("name").notNull(),
+  allowed_domains: text("allowed_domains").array(),
+  status: text("status").notNull().default("active"),
   created_at: text("created_at").default(sql`now()`),
 });
