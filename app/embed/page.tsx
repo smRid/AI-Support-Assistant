@@ -1,8 +1,9 @@
 'use client'
 
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { AlertCircle, Bot, ChevronDown, MessageCircle } from 'lucide-react';
+import { AlertCircle, Bot, ChevronDown, MessageCircle, Send } from 'lucide-react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react'
@@ -249,18 +250,18 @@ return (
                   {msg.content}
                 </div>
                 {msg.isWelcome && visibleSections.length > 0 && (
-  <div className="ml-1 flex flex-col items-start gap-2 pt-2">
-    {visibleSections.map((section) => (
-      <button
-        key={section.id}
-        onClick={() => handleSectionClick(section.name)}
-        className="px-3 py-1.5 rounded-full border border-zinc-700 bg-zinc-800/50 hover:bg-zinc-700 hover:border-zinc-600 text-zinc-300 text-xs font-medium transition-all"
-      >
-        {section.name}
-      </button>
-    ))}
-  </div>
-)}
+                  <div className="ml-1 flex flex-wrap items-center gap-2 pt-1">
+                    {visibleSections.map((section) => (
+                      <button
+                        key={section.id}
+                        onClick={() => handleSectionClick(section.name)}
+                        className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-white"
+                      >
+                        {section.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -292,6 +293,38 @@ return (
   </div>
 )}
         <div ref={scrollViewportRef} />
+      </div>
+    </div>
+    <div className="border-t border-white/5 bg-[#0E0E12] p-4 shrink-0 z-10">
+      <div className="relative rounded-2xl border border-white/10 bg-[#141418] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-colors focus-within:border-white/20 focus-within:ring-2 focus-within:ring-white/10">
+        <Textarea
+          rows={1}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={
+            activeSection ? "Type a message..." : "Select a topic above..."
+          }
+          className="min-h-0 max-h-[120px] resize-none overflow-y-auto border-0 bg-transparent px-0 py-0 pr-16 text-[15px] leading-6 text-white placeholder:text-zinc-500 focus-visible:border-0 focus-visible:ring-0"
+        />
+        <button
+          onClick={handleSend}
+          disabled={isTyping || !input.trim() || !activeSection}
+          aria-label="Send message"
+          className={cn(
+            "absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border transition-all disabled:opacity-100",
+            isTyping || !input.trim() || !activeSection
+              ? "border-white/10 bg-[#24242b] text-zinc-500"
+              : "border-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.28)] hover:scale-[1.02] hover:brightness-110"
+          )}
+          style={
+            !isTyping && activeSection && input.trim()
+              ? { backgroundColor: primaryColor, color: "white" }
+              : undefined
+          }
+        >
+          <Send className="h-4 w-4" />
+        </button>
       </div>
     </div>
   </div>
