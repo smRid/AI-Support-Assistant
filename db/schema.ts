@@ -39,7 +39,7 @@ export const knowledgeSources = pgTable("knowledge_source", {
   created_at: text("created_at").default(sql`now()`),
 });
 
-// export const knowledge_source = knowledgeSources;
+export const knowledge_source = knowledgeSources;
 
 
 export const sections = pgTable("sections", {

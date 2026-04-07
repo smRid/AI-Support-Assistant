@@ -138,76 +138,55 @@ useEffect(() => {
 }, [messages, isTyping, isOpen]); // Scroll when opened too
 
 const handleSend = async () => {
-  const trimmedInput = input.trim();
-  const selectedSectionName =
-    activeSection ?? (sections.length === 1 ? sections[0].name : null);
-  const shouldPickTopicFirst = sections.length > 1 && !selectedSectionName;
+  if (!input.trim() || !token || isTyping) return;
 
-  if (!trimmedInput || isTyping || shouldPickTopicFirst || !token) {
-    return;
-  }
+  const currentSection = sections.find((s) => s.name === activeSection);
+  const sourceIds = currentSection?.source_ids || [];
 
-  const currentSection = sections.find(
-    (section) => section.name === selectedSectionName
-  );
-  const sourceIds = Array.isArray(currentSection?.source_ids)
-    ? currentSection.source_ids
-    : [];
-
-  const userMsg = {
-    role: "user",
-    content: trimmedInput,
-    section: selectedSectionName,
-  };
-  const requestMessages = [...messages, userMsg].map(({ role, content }) => ({
-    role,
-    content,
-  }));
-
+  const userMsg = { role: "user", content: input, section: activeSection };
   setMessages((prev) => [...prev, userMsg]);
   setInput("");
   setIsTyping(true);
 
   try {
-    const res = await fetch("/api/widget/chat", {
+    const res = await fetch("/api/chat/public", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({
-        token,
-        messages: requestMessages,
+        messages: [...messages, userMsg],
         knowledge_source_ids: sourceIds,
       }),
     });
 
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => null);
-      throw new Error(
-        typeof errorData?.error === "string"
-          ? errorData.error
-          : "Failed to generate response"
-      );
+    if (res.ok) {
+      const data = await res.json();
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.response, section: null },
+      ]);
+    } else {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "I'm having trouble connecting right now. Please try again.",
+          section: null,
+        },
+      ]);
     }
-
-    const data = await res.json();
+  } catch (err) {
+    console.error("Public chat error:", err);
     setMessages((prev) => [
       ...prev,
       {
         role: "assistant",
         content:
-          typeof data.response === "string" && data.response.trim()
-            ? data.response
-            : "I'm sorry, I couldn't generate a response.",
-        section: selectedSectionName,
-      },
-    ]);
-  } catch (err) {
-    console.error("Widget chat error:", err);
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "assistant",
-        content: "I'm sorry, I couldn't respond just now. Please try again.",
-        section: selectedSectionName,
+          "I'm having trouble connecting right now. Please try again.",
+        section: null,
       },
     ]);
   } finally {
@@ -228,10 +207,7 @@ const visibleSections =
   sections.length > 0
     ? sections
     : [{ id: "fallback-faq", name: "FAQ", source_ids: [] }];
-const resolvedSectionName =
-  activeSection ?? (sections.length === 1 ? sections[0].name : null);
-const shouldPickTopicFirst = sections.length > 1 && !resolvedSectionName;
-const canSend = !isTyping && input.trim().length > 0 && !shouldPickTopicFirst;
+const canSend = !isTyping && input.trim().length > 0 && Boolean(token);
 
 if(loading) return null;
 if(error && isOpen){
@@ -381,9 +357,7 @@ return (
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={
-            shouldPickTopicFirst ? "Select a topic above..." : "Type a message..."
-          }
+          placeholder="Type a message..."
           className="min-h-0 max-h-[120px] resize-none overflow-y-auto border-0 bg-transparent px-0 py-0 pr-16 text-[15px] leading-6 text-white placeholder:text-zinc-500 focus-visible:border-0 focus-visible:ring-0"
         />
         <button
