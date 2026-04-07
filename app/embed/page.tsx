@@ -1,10 +1,10 @@
 'use client'
 
-import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { AlertCircle, Bot, ChevronDown, MessageCircle, Send } from 'lucide-react';
+import { AlertCircle, ChevronDown, MessageCircle, Send } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react'
 
@@ -138,6 +138,81 @@ useEffect(() => {
 }, [messages, isTyping, isOpen]); // Scroll when opened too
 
 const handleSend = async () => {
+  const trimmedInput = input.trim();
+  const selectedSectionName =
+    activeSection ?? (sections.length === 1 ? sections[0].name : null);
+  const shouldPickTopicFirst = sections.length > 1 && !selectedSectionName;
+
+  if (!trimmedInput || isTyping || shouldPickTopicFirst || !token) {
+    return;
+  }
+
+  const currentSection = sections.find(
+    (section) => section.name === selectedSectionName
+  );
+  const sourceIds = Array.isArray(currentSection?.source_ids)
+    ? currentSection.source_ids
+    : [];
+
+  const userMsg = {
+    role: "user",
+    content: trimmedInput,
+    section: selectedSectionName,
+  };
+  const requestMessages = [...messages, userMsg].map(({ role, content }) => ({
+    role,
+    content,
+  }));
+
+  setMessages((prev) => [...prev, userMsg]);
+  setInput("");
+  setIsTyping(true);
+
+  try {
+    const res = await fetch("/api/widget/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token,
+        messages: requestMessages,
+        knowledge_source_ids: sourceIds,
+      }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      throw new Error(
+        typeof errorData?.error === "string"
+          ? errorData.error
+          : "Failed to generate response"
+      );
+    }
+
+    const data = await res.json();
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content:
+          typeof data.response === "string" && data.response.trim()
+            ? data.response
+            : "I'm sorry, I couldn't generate a response.",
+        section: selectedSectionName,
+      },
+    ]);
+  } catch (err) {
+    console.error("Widget chat error:", err);
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: "I'm sorry, I couldn't respond just now. Please try again.",
+        section: selectedSectionName,
+      },
+    ]);
+  } finally {
+    setIsTyping(false);
+  }
 
 }
 
@@ -153,6 +228,10 @@ const visibleSections =
   sections.length > 0
     ? sections
     : [{ id: "fallback-faq", name: "FAQ", source_ids: [] }];
+const resolvedSectionName =
+  activeSection ?? (sections.length === 1 ? sections[0].name : null);
+const shouldPickTopicFirst = sections.length > 1 && !resolvedSectionName;
+const canSend = !isTyping && input.trim().length > 0 && !shouldPickTopicFirst;
 
 if(loading) return null;
 if(error && isOpen){
@@ -303,22 +382,22 @@ return (
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={
-            activeSection ? "Type a message..." : "Select a topic above..."
+            shouldPickTopicFirst ? "Select a topic above..." : "Type a message..."
           }
           className="min-h-0 max-h-[120px] resize-none overflow-y-auto border-0 bg-transparent px-0 py-0 pr-16 text-[15px] leading-6 text-white placeholder:text-zinc-500 focus-visible:border-0 focus-visible:ring-0"
         />
         <button
           onClick={handleSend}
-          disabled={isTyping || !input.trim() || !activeSection}
+          disabled={!canSend}
           aria-label="Send message"
           className={cn(
             "absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border transition-all disabled:opacity-100",
-            isTyping || !input.trim() || !activeSection
+            !canSend
               ? "border-white/10 bg-[#24242b] text-zinc-500"
               : "border-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.28)] hover:scale-[1.02] hover:brightness-110"
           )}
           style={
-            !isTyping && activeSection && input.trim()
+            canSend
               ? { backgroundColor: primaryColor, color: "white" }
               : undefined
           }
@@ -326,6 +405,14 @@ return (
           <Send className="h-4 w-4" />
         </button>
       </div>
+      <div className="mt-2 text-center">
+  <Link
+    href={"/"}
+    className="text-[10px] text-zinc-600 font-medium hover:text-zinc-500 transition-colors"
+  >
+    Powered by Arena AI
+  </Link>
+</div>
     </div>
   </div>
 );
