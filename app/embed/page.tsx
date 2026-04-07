@@ -6,7 +6,7 @@ import { AlertCircle, ChevronDown, MessageCircle, Send } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import React, { useEffect, useRef, useState } from 'react'
+import React, { Suspense, useEffect, useRef, useState } from 'react'
 
 interface ChatBotMetadata {
   id: string;
@@ -20,7 +20,7 @@ interface Section {
   source_ids: string[];
 }
 
-const EmbedPage = () => {
+const EmbedPageContent = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -390,6 +390,14 @@ return (
     </div>
   </div>
 );
+};
+
+const EmbedPage = () => {
+  return (
+    <Suspense fallback={null}>
+      <EmbedPageContent />
+    </Suspense>
+  );
 };
 
 export default EmbedPage;
