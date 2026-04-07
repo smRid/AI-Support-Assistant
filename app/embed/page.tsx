@@ -252,15 +252,10 @@ return (
   <div className="ml-1 flex flex-col items-start gap-2 pt-2">
     {visibleSections.map((section) => (
       <button
-key={section.id}
-onClick={() => handleSectionClick(section.name)}
-className={cn(
-  "text-left text-base font-medium leading-none transition-colors",
-  activeSection === section.name
-    ? "text-white"
-    : "text-zinc-100 hover:text-white"
-)}
->
+        key={section.id}
+        onClick={() => handleSectionClick(section.name)}
+        className="px-3 py-1.5 rounded-full border border-zinc-700 bg-zinc-800/50 hover:bg-zinc-700 hover:border-zinc-600 text-zinc-300 text-xs font-medium transition-all"
+      >
         {section.name}
       </button>
     ))}
@@ -270,7 +265,32 @@ className={cn(
             </div>
           </div>
         ))}
+        {isTyping && (
+  <div className="flex w-full justify-start">
+    <div className="flex max-w-[85%] gap-3 flex-row">
+      <div className="relative mt-0.5 shrink-0">
+        <Image
+          src="/chatbot_profile.png"
+          alt="Support Agent"
+          className="h-8 w-8 rounded-full object-cover"
+          width={40}
+          height={40}
+        />
+        <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[#0A0A0E] bg-emerald-500"></div>
+      </div>
 
+      <div className="space-y-2">
+        <div className="w-fit max-w-[240px] rounded-3xl px-4 py-3 text-sm leading-relaxed shadow-sm bg-white text-zinc-900 rounded-tl-md">
+          <div className="flex items-center gap-1">
+            <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-400"></div>
+            <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-400 delay-75"></div>
+            <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-400 delay-150"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
         <div ref={scrollViewportRef} />
       </div>
     </div>
