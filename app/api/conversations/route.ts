@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { chatBotMetadata, conversation, messages } from "@/db/schema";
 import { isAuthorized } from "@/lib/isAuthorized";
+import { getWorkspaceContext } from "@/lib/workspace";
 import { desc, eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -8,11 +9,12 @@ export async function GET() {
   try {
     const user = await isAuthorized();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const workspace = await getWorkspaceContext(user);
 
     const bots = await db
     .select()
     .from(chatBotMetadata)
-    .where(eq(chatBotMetadata.user_email, user.email));
+    .where(inArray(chatBotMetadata.user_email, workspace.memberEmails));
 
     if (bots.length === 0) {
     return NextResponse.json({ conversations: [] });

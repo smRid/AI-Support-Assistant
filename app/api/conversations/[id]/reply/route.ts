@@ -1,7 +1,8 @@
 import { db } from "@/db/client";
 import { chatBotMetadata, conversation, messages } from "@/db/schema";
 import { isAuthorized } from "@/lib/isAuthorized";
-import { and, eq } from "drizzle-orm";
+import { getWorkspaceContext } from "@/lib/workspace";
+import { and, eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function POST(
@@ -12,6 +13,7 @@ export async function POST(
     const user = await isAuthorized();
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const workspace = await getWorkspaceContext(user);
     const { id: conversationId } = await params;
     const { content } = await req.json();
 
@@ -35,7 +37,7 @@ export async function POST(
     .where(
         and(
         eq(chatBotMetadata.id, conv.chatbot_id),
-        eq(chatBotMetadata.user_email, user.email)
+        inArray(chatBotMetadata.user_email, workspace.memberEmails)
         )
     );
 
