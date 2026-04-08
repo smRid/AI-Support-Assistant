@@ -66,7 +66,7 @@ export default function DashboardPage() {
           <InitialForm />
         </div>
       ) : (
-        <div className="">
+        <div className="flex min-h-screen w-full justify-center">
           <DashboradOverView />
         </div>
       )}
