@@ -5,6 +5,7 @@ import {
   type KeyboardEvent,
   useDeferredValue,
   useEffect,
+  useEffectEvent,
   useRef,
   useState,
 } from "react";
@@ -17,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 type MessageRole = "user" | "assistant";
+const LIVE_REFRESH_INTERVAL_MS = 4000;
 
 interface Message {
   id: string;
@@ -52,7 +54,10 @@ async function requestJson<T>(
   input: RequestInfo | URL,
   init?: RequestInit
 ): Promise<T> {
-  const response = await fetch(input, init);
+  const response = await fetch(input, {
+    cache: "no-store",
+    ...init,
+  });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
@@ -257,37 +262,58 @@ export default function ConversationPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadConversations() {
+  const refreshConversations = useEffectEvent(async (showLoading = false) => {
+    if (showLoading) {
       setIsLoadingList(true);
+    }
+
+    try {
+      const data = await fetchConversationsData();
+      setConversations(data);
       setListError(null);
+    } catch (error) {
+      if (showLoading) {
+        setConversations([]);
+        setListError(getErrorMessage(error, "Failed to load conversations."));
+      } else {
+        console.error("Background conversation refresh failed", error);
+      }
+    } finally {
+      if (showLoading) {
+        setIsLoadingList(false);
+      }
+    }
+  });
+
+  const refreshMessages = useEffectEvent(
+    async (conversationId: string, showLoading = false) => {
+      if (showLoading) {
+        setIsLoadingMessages(true);
+      }
 
       try {
-        const data = await fetchConversationsData();
-        if (!cancelled) {
-          setConversations(data);
-        }
+        const data = await fetchConversationMessages(conversationId);
+        setMessages(data);
+        setMessagesError(null);
       } catch (error) {
-        if (!cancelled) {
-          setConversations([]);
-          setListError(
-            getErrorMessage(error, "Failed to load conversations.")
+        if (showLoading) {
+          setMessages([]);
+          setMessagesError(
+            getErrorMessage(error, "Failed to load this conversation.")
           );
+        } else {
+          console.error("Background message refresh failed", error);
         }
       } finally {
-        if (!cancelled) {
-          setIsLoadingList(false);
+        if (showLoading) {
+          setIsLoadingMessages(false);
         }
       }
     }
+  );
 
-    void loadConversations();
-
-    return () => {
-      cancelled = true;
-    };
+  useEffect(() => {
+    void refreshConversations(true);
   }, []);
 
   useEffect(() => {
@@ -312,36 +338,20 @@ export default function ConversationPage() {
       return;
     }
 
-    const conversationId = selectedId;
-    let cancelled = false;
+    void refreshMessages(selectedId, true);
+  }, [selectedId]);
 
-    async function loadMessages() {
-      setIsLoadingMessages(true);
-      setMessagesError(null);
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      void refreshConversations(false);
 
-      try {
-        const data = await fetchConversationMessages(conversationId);
-        if (!cancelled) {
-          setMessages(data);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setMessages([]);
-          setMessagesError(
-            getErrorMessage(error, "Failed to load this conversation.")
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingMessages(false);
-        }
+      if (selectedId) {
+        void refreshMessages(selectedId, false);
       }
-    }
-
-    void loadMessages();
+    }, LIVE_REFRESH_INTERVAL_MS);
 
     return () => {
-      cancelled = true;
+      window.clearInterval(intervalId);
     };
   }, [selectedId]);
 
