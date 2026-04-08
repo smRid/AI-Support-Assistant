@@ -1,5 +1,6 @@
 "use client";
 
+import DashboradOverView from "@/components/dashboard/dashboradOverView";
 import InitialForm from "@/components/dashboard/initialForm";
 import { useEffect, useState } from "react";
 
@@ -65,8 +66,8 @@ export default function DashboardPage() {
           <InitialForm />
         </div>
       ) : (
-        <div className="flex min-h-screen w-full items-center justify-center p-6 text-zinc-400">
-          Dashboard content coming soon.
+        <div className="">
+          <DashboradOverView />
         </div>
       )}
     </div>
