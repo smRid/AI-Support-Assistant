@@ -11,7 +11,9 @@
       return;
     }
 
-    fetch("http://localhost:3000/api/widget/session", {
+    var widgetOrigin = new URL(script.src, window.location.href).origin;
+
+    fetch(widgetOrigin + "/api/widget/session", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -33,7 +35,7 @@
 
         var iframe = document.createElement("iframe");
         iframe.src =
-          "http://localhost:3000/embed?token=" + encodeURIComponent(data.token);
+          widgetOrigin + "/embed?token=" + encodeURIComponent(data.token);
 
         iframe.setAttribute("title", "Support Chat");
         iframe.style.position = "fixed";
