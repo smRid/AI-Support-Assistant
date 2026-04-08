@@ -1,6 +1,6 @@
 "use client";
 
-import DashboradOverView from "@/components/dashboard/dashboradOverView";
+import DashboardOverView from "@/components/dashboard/dashboardOverView";
 import InitialForm from "@/components/dashboard/initialForm";
 import { useEffect, useState } from "react";
 
@@ -60,16 +60,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full">
-      {!isMetaDataAvailable ? (
-        <div className="flex min-h-screen w-full">
-          <InitialForm />
-        </div>
-      ) : (
-        <div className="flex min-h-screen w-full justify-center">
-          <DashboradOverView />
-        </div>
-      )}
+<div className="flex-1 w-full">
+  {!isMetaDataAvailable ? (
+    <div className="w-full flex items-center justify-center p-4 min-h-[50vh]">
+      <InitialForm />
     </div>
+  ) : (
+    <DashboardOverView />
+  )}
+</div>
   );
 }
