@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
+  ArrowRight,
   ArrowUpRight,
   Check,
+  Copy,
   FileText,
   Globe,
   Loader2,
@@ -15,6 +17,14 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -41,6 +51,11 @@ interface OverviewResponse {
       tone: string;
     }>;
   };
+  chats: Array<{
+    title: string;
+    snippet: string;
+    time: string;
+  }>;
   counts: {
     knowledge: number;
     sections: number;
@@ -113,10 +128,16 @@ export default function DashboardOverView() {
   const [data, setData] = useState<OverviewResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [origin, setOrigin] = useState("");
   const router = useRouter();
 
   useEffect(() => {
     let cancelled = false;
+
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+    }
 
     async function fetchOverview() {
       setIsLoading(true);
@@ -241,6 +262,16 @@ export default function DashboardOverView() {
     },
   ];
 
+  const widgetCode = `<script src="${origin}/widget.js" \n  data-id="${
+    data?.botId || "..."
+  }" \n  defer>\n</script>`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(widgetCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-9 px-6 py-8 md:px-10 md:py-10">
       <section className="space-y-5">
@@ -255,117 +286,212 @@ export default function DashboardOverView() {
         </div>
       </section>
 
-      <section className={cn(panelClassName, "px-7 py-7")}>
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <h2 className="text-[1.85rem] font-semibold tracking-tight text-white">
-              Knowledge Base
-            </h2>
-          </div>
+      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="space-y-8">
+          <section className={cn(panelClassName, "px-7 py-7")}>
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h2 className="text-[1.85rem] font-semibold tracking-tight text-white">
+                  Knowledge Base
+                </h2>
+              </div>
 
-          <Link
-            href="/dashboard/knowledge"
-            className="inline-flex h-11 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 text-sm font-medium text-zinc-300 transition-colors hover:border-white/[0.12] hover:bg-white/[0.06] hover:text-white"
-          >
-            Manage sources
-          </Link>
-        </div>
-
-        <div className="mt-7 grid gap-4 md:grid-cols-3">
-          {knowledgeMetrics.map((metric) => (
-            <KnowledgeMetric
-              key={metric.label}
-              label={metric.label}
-              value={metric.value}
-              icon={metric.icon}
-              iconClassName={metric.iconClassName}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className={cn(panelClassName, "min-h-[360px]")}>
-        <div className="flex flex-col gap-5 px-7 py-7 md:flex-row md:items-start md:justify-between">
-          <div>
-            <h2 className="text-[1.85rem] font-semibold tracking-tight text-white">
-              Sections
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-zinc-500">
-              configure behavior for different topics
-            </p>
-          </div>
-
-          <Link
-            href="/dashboard/sections"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-white px-5 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
-          >
-            <Plus className="size-4" />
-            <span>Create Section</span>
-          </Link>
-        </div>
-
-        <div className="border-t border-white/[0.06]">
-          {data.sections.list.length === 0 ? (
-            <div className="flex min-h-[220px] items-center justify-center px-7 py-10 text-center text-sm text-zinc-500">
-              No sections configured yet. Create your first section to define how the assistant responds to different topics.
+              <Link
+                href="/dashboard/knowledge"
+                className="inline-flex h-11 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 text-sm font-medium text-zinc-300 transition-colors hover:border-white/[0.12] hover:bg-white/[0.06] hover:text-white"
+              >
+                Manage sources
+              </Link>
             </div>
-          ) : (
-            <Table>
-              <TableHeader className="[&_tr]:border-white/[0.06]">
-                <TableRow className="bg-white/[0.02] hover:bg-white/[0.02]">
-                  <TableHead className="px-7 text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500">
-                    Name
-                  </TableHead>
-                  <TableHead className="text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500">
-                    Sources
-                  </TableHead>
-                  <TableHead className="text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500">
-                    Tone
-                  </TableHead>
-                  <TableHead className="w-[88px] px-7 text-right text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500">
-                    Action
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="[&_tr]:border-white/[0.06]">
-                {data.sections.list.map((section) => (
-                  <TableRow
-                    key={`${section.name}-${section.tone}`}
-                    className="bg-transparent hover:bg-white/[0.02]"
-                  >
-                    <TableCell className="px-7 py-5 text-base font-semibold tracking-tight text-white">
-                      {section.name}
-                    </TableCell>
-                    <TableCell className="py-5 text-base text-zinc-400">
-                      {section.sourceCount} source
-                      {section.sourceCount === 1 ? "" : "s"}
-                    </TableCell>
-                    <TableCell className="py-5">
-                      <Badge
-                        variant="secondary"
-                        className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-sm font-medium capitalize text-zinc-300"
+
+            <div className="mt-7 grid gap-4 md:grid-cols-3">
+              {knowledgeMetrics.map((metric) => (
+                <KnowledgeMetric
+                  key={metric.label}
+                  label={metric.label}
+                  value={metric.value}
+                  icon={metric.icon}
+                  iconClassName={metric.iconClassName}
+                />
+              ))}
+            </div>
+          </section>
+
+          <section className={cn(panelClassName, "min-h-[360px]")}>
+            <div className="flex flex-col gap-5 px-7 py-7 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h2 className="text-[1.85rem] font-semibold tracking-tight text-white">
+                  Sections
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-zinc-500">
+                  configure behavior for different topics
+                </p>
+              </div>
+
+              <Link
+                href="/dashboard/sections"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-white px-5 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
+              >
+                <Plus className="size-4" />
+                <span>Create Section</span>
+              </Link>
+            </div>
+
+            <div className="border-t border-white/[0.06]">
+              {data.sections.list.length === 0 ? (
+                <div className="flex min-h-[220px] items-center justify-center px-7 py-10 text-center text-sm text-zinc-500">
+                  No sections configured yet. Create your first section to define how the assistant responds to different topics.
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader className="[&_tr]:border-white/[0.06]">
+                    <TableRow className="bg-white/[0.02] hover:bg-white/[0.02]">
+                      <TableHead className="px-7 text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500">
+                        Name
+                      </TableHead>
+                      <TableHead className="text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500">
+                        Sources
+                      </TableHead>
+                      <TableHead className="text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500">
+                        Tone
+                      </TableHead>
+                      <TableHead className="w-[88px] px-7 text-right text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500">
+                        Action
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="[&_tr]:border-white/[0.06]">
+                    {data.sections.list.map((section) => (
+                      <TableRow
+                        key={`${section.name}-${section.tone}`}
+                        className="bg-transparent hover:bg-white/[0.02]"
                       >
-                        {section.tone}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="px-7 py-5 text-right">
-                      <button
-                        type="button"
-                        onClick={() => router.push("/dashboard/sections")}
-                        className="inline-flex size-8 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-zinc-300 transition-colors hover:border-white/[0.14] hover:bg-white/[0.08] hover:text-white"
-                        aria-label={`Manage ${section.name}`}
-                        title={`Manage ${section.name}`}
-                      >
-                        <MessageSquare className="size-4" />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+                        <TableCell className="px-7 py-5 text-base font-semibold tracking-tight text-white">
+                          {section.name}
+                        </TableCell>
+                        <TableCell className="py-5 text-base text-zinc-400">
+                          {section.sourceCount} source
+                          {section.sourceCount === 1 ? "" : "s"}
+                        </TableCell>
+                        <TableCell className="py-5">
+                          <Badge
+                            variant="secondary"
+                            className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-sm font-medium capitalize text-zinc-300"
+                          >
+                            {section.tone}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="px-7 py-5 text-right">
+                          <button
+                            type="button"
+                            onClick={() => router.push("/dashboard/sections")}
+                            className="inline-flex size-8 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-zinc-300 transition-colors hover:border-white/[0.14] hover:bg-white/[0.08] hover:text-white"
+                            aria-label={`Manage ${section.name}`}
+                            title={`Manage ${section.name}`}
+                          >
+                            <MessageSquare className="size-4" />
+                          </button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
+          </section>
         </div>
-      </section>
+
+        <div className="space-y-8">
+          <Card className="min-h-80 rounded-[28px] border border-white/[0.06] bg-[#0A0A0E] py-0 ring-0 shadow-[0_20px_60px_rgba(0,0,0,0.22)]">
+            <CardHeader className="px-7 pb-4 pt-7">
+              <div className="flex items-center justify-between gap-4">
+                <CardTitle className="text-[1.85rem] font-semibold tracking-tight text-white">
+                  Recent Chats
+                </CardTitle>
+                <Link
+                  href="/dashboard/conversations"
+                  className="inline-flex items-center gap-1 text-xs text-zinc-500 transition hover:text-white"
+                >
+                  <span>View all</span>
+                  <ArrowRight className="size-3" />
+                </Link>
+              </div>
+            </CardHeader>
+
+            <CardContent className="border-t border-white/[0.06] px-7 pb-7 pt-5">
+              {data.chats.length === 0 ? (
+                <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] px-4 py-4 text-sm text-zinc-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+                  No chats yet.
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+                  {data.chats.map((chat, index) => (
+                    <Link
+                      key={`${chat.title}-${chat.time}-${index}`}
+                      href="/dashboard/conversations"
+                      className={cn(
+                        "group block px-4 py-4 transition-colors hover:bg-white/[0.05]",
+                        index !== data.chats.length - 1
+                          ? "border-b border-white/[0.06]"
+                          : ""
+                      )}
+                    >
+                      <div className="mb-1 flex items-start gap-3">
+                        <span className="text-sm font-medium text-zinc-200 group-hover:text-white">
+                          {chat.title}
+                        </span>
+                        <span className="ml-auto whitespace-nowrap text-[10px] text-zinc-600">
+                          {chat.time}
+                        </span>
+                      </div>
+                      <p className="line-clamp-1 text-xs text-zinc-500">
+                        {chat.snippet}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card
+            className="rounded-[28px] border border-white/[0.06] bg-[#0A0A0E] py-0 ring-0 shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
+            id="widget"
+          >
+            <CardHeader className="px-7 pb-4 pt-7">
+              <CardTitle className="text-[1.85rem] font-semibold tracking-tight text-white">
+                Install Widget
+              </CardTitle>
+              <CardDescription className="max-w-sm pt-2 text-sm leading-6 text-zinc-500">
+                Add this snippet to your website appropriate page.
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="px-7 pb-7">
+              <div className="group relative">
+                <pre className="overflow-x-auto rounded-2xl bg-[#050509] p-4 pr-14 text-xs text-zinc-400">
+                  <code className="block font-mono text-[10px] text-zinc-400">
+                    {widgetCode}
+                  </code>
+                </pre>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-2 h-7 w-7 rounded-lg bg-white/10 text-zinc-200 hover:bg-white/20 hover:text-white"
+                  onClick={handleCopy}
+                >
+                  {copied ? (
+                    <Check className="size-3" />
+                  ) : (
+                    <Copy className="size-3" />
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
