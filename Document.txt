@@ -1,0 +1,275 @@
+CUSTOMER CHATBOT PROJECT GUIDE
+
+Purpose
+This document is a step-by-step operating guide for developers, testers, and project owners working on the Customer Chatbot project. It explains how to run the application, configure the platform, train the chatbot, embed it on a website, and manage customer conversations.
+
+Step 1. Understand the product
+Customer Chatbot is a support automation platform with two main experiences:
+
+- An internal dashboard for admins and team members
+- A public chat widget that can be embedded on an external website
+
+The internal dashboard is used to:
+
+- create the workspace
+- add business knowledge
+- define chatbot sections and tone
+- customize the widget
+- invite team members
+- monitor and reply to conversations
+
+The public widget is used by website visitors to ask questions and receive AI-generated answers based on the saved knowledge.
+
+Step 2. Install the project locally
+
+1. Make sure Node.js 20+ and npm are installed.
+2. Open the project folder.
+3. Install dependencies:
+
+```bash
+npm install
+```
+
+Step 3. Configure environment variables
+Create a `.env.local` file in the project root and add the required values.
+
+Required variables:
+
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
+- `DATABASE_URL`
+- `OPENAI_API_KEY`
+- `JWT_SECRET`
+
+Optional variables:
+
+- `OPENAI_BASE_URL`
+- `ZENROWS_API_KEY`
+
+Important note:
+The OpenAI helper reads `OPENAI_BASE_URL`. If your environment file currently uses `OPENAI_BASE_URI`, rename it so the application can read it correctly.
+
+Step 4. Prepare the database
+This project uses Neon Postgres with Drizzle ORM.
+
+For a fresh setup:
+
+```bash
+npm run db:push
+```
+
+Useful database commands:
+
+- `npm run db:generate` creates migrations from schema changes
+- `npm run db:migrate` applies generated migrations
+- `npm run db:studio` opens Drizzle Studio
+
+Step 5. Start the application
+
+```bash
+npm run dev
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
+
+Step 6. Sign in and initialize the workspace
+
+1. Sign in through Clerk.
+2. The app sends the user through `/auth/callback`.
+3. The callback syncs the Clerk user into the local database.
+4. The app stores a `user_session` cookie for internal authorization.
+5. After sign-in, open `/dashboard`.
+
+If no workspace metadata exists yet, the dashboard shows an onboarding form asking for:
+
+- business name
+- primary website
+- extra links
+
+This metadata becomes the initial identity of the workspace.
+
+Step 7. Add knowledge sources
+Open `/dashboard/knowledge`.
+
+The system currently supports three knowledge source types:
+
+1. Website
+Use this when you want the chatbot to learn from a company website or documentation page.
+
+2. Q&A / Text
+Use this when you want to paste support notes, policies, FAQs, or internal guidance directly into the app.
+
+3. File Upload
+Use this for CSV uploads. The current UI accepts CSV files up to 10 MB.
+
+Recommended sequence:
+
+1. Add the primary website first.
+2. Add extra policy or FAQ text next.
+3. Upload structured CSV content if needed.
+4. Confirm the new sources appear in the knowledge table.
+
+Step 8. Create sections
+Open `/dashboard/sections`.
+
+Sections let you control how the assistant behaves for different topics. Each section can be connected to selected knowledge sources and given a different tone.
+
+Section fields include:
+
+- name
+- description
+- connected knowledge sources
+- tone
+- allowed topics
+- blocked topics
+
+Recommended section examples:
+
+- Shipping
+- Billing
+- Returns
+- Technical Support
+- General FAQ
+
+Step 9. Configure the chatbot
+Open `/dashboard/chatbot`.
+
+This page allows you to:
+
+- test the assistant in the internal playground
+- choose the primary widget color
+- update the welcome message
+- view the embed code
+
+Best practice:
+
+1. Choose a clear welcome message.
+2. Test multiple section flows in the simulator.
+3. Confirm answers stay aligned with the selected knowledge sources.
+
+Step 10. Embed the widget on a website
+The widget is loaded through `public/widget.js`.
+
+General embed pattern:
+
+```html
+<script src="https://your-domain.com/widget.js" data-id="YOUR_CHATBOT_ID" defer></script>
+```
+
+How it works:
+
+1. The script reads the `data-id` chatbot identifier.
+2. It requests a short-lived token from `/api/widget/session`.
+3. It creates an iframe that loads `/embed?token=...`.
+4. The iframe expands and collapses through `postMessage`.
+
+Before production rollout:
+
+1. Replace any localhost-based example snippet with your deployed domain.
+2. Confirm the chatbot ID is valid.
+3. Test the widget on the target website.
+
+Step 11. Handle live conversations
+Open `/dashboard/conversations`.
+
+This page acts as the support inbox. It lets the team:
+
+- view active visitor threads
+- search conversations
+- read message history
+- send manual replies
+
+The public assistant stores messages in the database so the internal team can continue the conversation from the dashboard.
+
+Step 12. Manage team access
+Open `/dashboard/settings`.
+
+From this page you can:
+
+- review workspace details
+- invite team members through Clerk organizations
+- see pending and active members
+- delete the workspace if necessary
+
+Shared team workflows depend on the current Clerk organization context.
+
+Step 13. Understand the main system flow
+
+1. Visitor opens a website with the embed script.
+2. `widget.js` requests a signed widget session token.
+3. The iframe loads the embed UI.
+4. The embed UI requests bot configuration and section data.
+5. Visitor messages are sent to `/api/chat/public`.
+6. The API loads selected knowledge content.
+7. OpenAI generates the response.
+8. The conversation and messages are stored in Postgres.
+9. Team members can later view and reply from the inbox.
+
+Step 14. Deploy safely
+Before deploying:
+
+1. set production Clerk credentials
+2. set the production `DATABASE_URL`
+3. set `OPENAI_API_KEY`
+4. set a strong `JWT_SECRET`
+5. set `ZENROWS_API_KEY` if website crawling is important
+6. confirm your widget script uses the deployed domain
+7. run a production build:
+
+```bash
+npm run build
+```
+
+Step 15. Troubleshooting checklist
+
+If the dashboard does not show the full workspace:
+
+- make sure the user completed onboarding metadata
+- make sure the app session cookie exists
+
+If website ingestion fails:
+
+- check the URL format
+- test again with a reachable public page
+- configure `ZENROWS_API_KEY` for stronger external page fetching
+
+If the chatbot does not answer:
+
+- check `OPENAI_API_KEY`
+- verify OpenAI billing and quota
+- verify the selected section has connected sources
+
+If the widget does not load:
+
+- confirm the script source points to the correct domain
+- confirm `data-id` contains a valid chatbot ID
+- confirm `JWT_SECRET` is set
+
+If custom OpenAI routing is needed:
+
+- use `OPENAI_BASE_URL`
+- do not rely on `OPENAI_BASE_URI`
+
+Step 16. Security and maintenance reminders
+
+- Never commit real secrets to the repository.
+- Rotate any credentials that were accidentally exposed during development.
+- Review widget, chat, and auth routes before production release.
+- Keep Clerk, Next.js, and OpenAI settings aligned with the deployed domain.
+
+Summary
+The normal operating flow for this project is:
+
+1. sign in
+2. create workspace metadata
+3. add knowledge
+4. create sections
+5. configure the chatbot
+6. install the widget
+7. monitor and reply to conversations
+
+Following this sequence will give the team a complete end-to-end support chatbot workflow.
