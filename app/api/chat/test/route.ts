@@ -2,10 +2,15 @@ import { db } from "@/db/client";
 import { knowledge_source } from "@/db/schema";
 import { countConversationTokens } from "@/lib/countConversationTokens";
 import { isAuthorized } from "@/lib/isAuthorized";
-import { openai, summarizeConversation } from "@/lib/openAI";
+import { createChatCompletion, summarizeConversation } from "@/lib/openRouter";
 import { getWorkspaceContext } from "@/lib/workspace";
 import { and, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
+
+type ChatMessage = {
+  role: "user" | "assistant" | "system";
+  content: string;
+};
 
 export async function POST(req: Request) {
   const user = await isAuthorized();
@@ -14,46 +19,79 @@ export async function POST(req: Request) {
   }
 
   const workspace = await getWorkspaceContext(user);
-  let { messages, knowledge_source_ids } = await req.json();
+  const body = await req.json();
+  const knowledge_source_ids = body.knowledge_source_ids;
 
-  let context = ""
+  let messages: ChatMessage[] = Array.isArray(body.messages)
+    ? body.messages
+        .filter(
+          (message: unknown): message is ChatMessage =>
+            typeof message === "object" &&
+            message !== null &&
+            "role" in message &&
+            "content" in message &&
+            typeof message.role === "string" &&
+            typeof message.content === "string"
+        )
+        .map((message: ChatMessage) => ({
+          role:
+            message.role === "assistant" || message.role === "system"
+              ? message.role
+              : "user",
+          content: message.content,
+        }))
+    : [];
 
-  if (knowledge_source_ids && knowledge_source_ids.length > 0) {
-  const sources = await db
-    .select({
-      content: knowledge_source.content,
-    })
-    .from(knowledge_source)
-    .where(
-      and(
-        inArray(knowledge_source.id, knowledge_source_ids),
-        inArray(knowledge_source.user_email, workspace.memberEmails),
-      ),
+  if (messages.length === 0) {
+    return NextResponse.json(
+      { error: "Messages are required" },
+      { status: 400 }
+    );
+  }
+
+  let context = "";
+
+  if (Array.isArray(knowledge_source_ids) && knowledge_source_ids.length > 0) {
+    const sourceIds = knowledge_source_ids.filter(
+      (sourceId: unknown): sourceId is string => typeof sourceId === "string"
     );
 
-    context = sources
-      .map((s) => s.content)
-      .filter(Boolean)
-      .join("\n\n");
+    if (sourceIds.length > 0) {
+      const sources = await db
+        .select({
+          content: knowledge_source.content,
+        })
+        .from(knowledge_source)
+        .where(
+          and(
+            inArray(knowledge_source.id, sourceIds),
+            inArray(knowledge_source.user_email, workspace.memberEmails)
+          )
+        );
+
+      context = sources
+        .map((source) => source.content)
+        .filter(Boolean)
+        .join("\n\n");
     }
+  }
 
-    const tokenCount = countConversationTokens(messages);
+  const tokenCount = countConversationTokens(messages);
 
-    if(tokenCount > 6000){
-  const recentMessages = messages.slice(-10);
+  if (tokenCount > 6000) {
+    const recentMessages = messages.slice(-10);
+    const olderMessages = messages.slice(0, -10);
 
-  const olderMessages = messages.slice(0, -10);
+    if (olderMessages.length > 0) {
+      const summary = await summarizeConversation(olderMessages);
 
-  if(olderMessages.length > 0){
-        const summary = await summarizeConversation(olderMessages);
+      context = `PREVIOUS CONVERSATION SUMMARY:\n${summary}\n\n${context}`;
 
-        context = `PREVIOUS CONVERSATION SUMMARY:\n${summary} \n\n` + context;
-
-        messages = recentMessages;
+      messages = recentMessages;
     }
-}
+  }
 
-const systemPrompt = `You are Sarah, a friendly human-like customer support specialist.
+  const systemPrompt = `You are Sarah, a friendly human-like customer support specialist.
 
 Rules:
 - If asked your name, say: "I'm Sarah."
@@ -72,20 +110,15 @@ Escalation:
 Context:
 ${context}`;
 
-try {
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [{ role: "system", content: systemPrompt }, ...messages],
-    temperature: 0.7,
-    max_tokens: 200,
-  });
-
-  const reply =
-    completion.choices[0].message.content ||
-    "I'm sorry, I couldn't generate a response.";
+  try {
+    const reply = await createChatCompletion({
+      messages: [{ role: "system", content: systemPrompt }, ...messages],
+      temperature: 0.5,
+      maxTokens: 200,
+    });
 
     return NextResponse.json({ response: reply });
-} catch (error) {
+  } catch (error) {
     console.error("Error in chat test:", error);
 
     const status =
@@ -98,8 +131,8 @@ try {
         : "Failed to generate response";
 
     return NextResponse.json(
-        { error: message }, 
-         { status });
-}
-
+      { error: message },
+      { status }
+    );
+  }
 }

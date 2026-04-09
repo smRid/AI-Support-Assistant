@@ -38,16 +38,18 @@ Required variables:
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
 - `DATABASE_URL`
-- `OPENAI_API_KEY`
+- `OPENROUTER_API_KEY`
 - `JWT_SECRET`
 
 Optional variables:
 
-- `OPENAI_BASE_URL`
+- `OPENROUTER_MODEL`
+- `OPENROUTER_HTTP_REFERER`
+- `OPENROUTER_APP_NAME`
 - `ZENROWS_API_KEY`
 
 Important note:
-The OpenAI helper reads `OPENAI_BASE_URL`. If your environment file currently uses `OPENAI_BASE_URI`, rename it so the application can read it correctly.
+The chatbot defaults to `meta-llama/llama-3-8b-instruct`. Set `OPENROUTER_MODEL` if you want to override it.
 
 Step 4. Prepare the database
 This project uses Neon Postgres with Drizzle ORM.
@@ -205,7 +207,7 @@ Step 13. Understand the main system flow
 4. The embed UI requests bot configuration and section data.
 5. Visitor messages are sent to `/api/chat/public`.
 6. The API loads selected knowledge content.
-7. OpenAI generates the response.
+7. OpenRouter generates the response.
 8. The conversation and messages are stored in Postgres.
 9. Team members can later view and reply from the inbox.
 
@@ -214,7 +216,7 @@ Before deploying:
 
 1. set production Clerk credentials
 2. set the production `DATABASE_URL`
-3. set `OPENAI_API_KEY`
+3. set `OPENROUTER_API_KEY`
 4. set a strong `JWT_SECRET`
 5. set `ZENROWS_API_KEY` if website crawling is important
 6. confirm your widget script uses the deployed domain
@@ -239,8 +241,8 @@ If website ingestion fails:
 
 If the chatbot does not answer:
 
-- check `OPENAI_API_KEY`
-- verify OpenAI billing and quota
+- check `OPENROUTER_API_KEY`
+- verify OpenRouter credits and provider availability
 - verify the selected section has connected sources
 
 If the widget does not load:
@@ -249,17 +251,17 @@ If the widget does not load:
 - confirm `data-id` contains a valid chatbot ID
 - confirm `JWT_SECRET` is set
 
-If custom OpenAI routing is needed:
+If you want to change the model or request metadata:
 
-- use `OPENAI_BASE_URL`
-- do not rely on `OPENAI_BASE_URI`
+- use `OPENROUTER_MODEL`
+- optionally set `OPENROUTER_HTTP_REFERER` and `OPENROUTER_APP_NAME`
 
 Step 16. Security and maintenance reminders
 
 - Never commit real secrets to the repository.
 - Rotate any credentials that were accidentally exposed during development.
 - Review widget, chat, and auth routes before production release.
-- Keep Clerk, Next.js, and OpenAI settings aligned with the deployed domain.
+- Keep Clerk, Next.js, and OpenRouter settings aligned with the deployed domain.
 
 Summary
 The normal operating flow for this project is:

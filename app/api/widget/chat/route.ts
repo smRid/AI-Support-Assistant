@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
 import { knowledge_source } from "@/db/schema";
 import { countConversationTokens } from "@/lib/countConversationTokens";
-import { openai, summarizeConversation } from "@/lib/openAI";
+import { createChatCompletion, summarizeConversation } from "@/lib/openRouter";
 import { and, eq, inArray } from "drizzle-orm";
 import { jwtVerify } from "jose";
 import { NextResponse } from "next/server";
@@ -129,16 +129,11 @@ Escalation:
 Context:
 ${context}`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const reply = await createChatCompletion({
       messages: [{ role: "system", content: systemPrompt }, ...requestMessages],
-      temperature: 0.7,
-      max_tokens: 200,
+      temperature: 0.5,
+      maxTokens: 200,
     });
-
-    const reply =
-      completion.choices[0].message.content ||
-      "I'm sorry, I couldn't generate a response.";
 
     return NextResponse.json({ response: reply });
   } catch (error) {

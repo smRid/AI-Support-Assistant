@@ -1,6 +1,6 @@
-import { encodingForModel } from "js-tiktoken";
+import { getEncoding } from "js-tiktoken";
 
-const enc = encodingForModel("gpt-4o-mini");
+const enc = getEncoding("o200k_base");
 
 export function countTokens(text: string): number {
   return enc.encode(text).length;

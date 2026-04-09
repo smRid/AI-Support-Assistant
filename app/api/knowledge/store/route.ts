@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
 import { knowledge_source } from "@/db/schema";
 import { isAuthorized } from "@/lib/isAuthorized";
-import { summarizeMarkdown } from "@/lib/openAI";
+import { summarizeMarkdown } from "@/lib/openRouter";
 import { getWorkspaceContext } from "@/lib/workspace";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";

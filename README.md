@@ -8,7 +8,7 @@ Customer Chatbot is a full-stack Next.js 16 application for building an AI-power
 - Stores workspace, chatbot, knowledge, section, and conversation data in Neon Postgres via Drizzle ORM.
 - Ingests knowledge from website URLs, pasted text/Q&A, and CSV uploads.
 - Lets admins group knowledge into sections with different tones and topic rules.
-- Generates chatbot responses through OpenAI with lightweight retrieval from saved knowledge.
+- Generates chatbot responses through OpenRouter with lightweight retrieval from saved knowledge.
 - Exposes a public widget flow using `public/widget.js`, `/api/widget/session`, and `/embed`.
 - Gives team members a dashboard for setup, chatbot testing, team invites, and live conversation replies.
 
@@ -19,7 +19,7 @@ Customer Chatbot is a full-stack Next.js 16 application for building an AI-power
 - Authentication: Clerk
 - Database: Neon Serverless Postgres
 - ORM and migrations: Drizzle ORM and Drizzle Kit
-- AI: OpenAI SDK
+- AI: OpenRouter chat completions
 - Token/session helpers: `jose`
 - Website ingestion helper: ZenRows (optional but supported)
 
@@ -48,7 +48,7 @@ db/
   client.ts             Drizzle + Neon connection
   schema.ts             Database tables
 lib/
-  openAI.ts             OpenAI client and summarization helpers
+  openRouter.ts         OpenRouter client and summarization helpers
   workspace.ts          Organization-aware workspace resolution
   isAuthorized.ts       App session reader
 public/
@@ -63,7 +63,7 @@ drizzle/
 - npm
 - A Clerk application
 - A Neon Postgres database
-- An OpenAI API key
+- An OpenRouter API key
 
 ## Environment Variables
 
@@ -74,14 +74,16 @@ Create `.env.local` and add the variables below.
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Yes | Clerk client-side key |
 | `CLERK_SECRET_KEY` | Yes | Clerk server-side key |
 | `DATABASE_URL` | Yes | Neon Postgres connection string |
-| `OPENAI_API_KEY` | Yes | Used for chatbot replies and summarization |
-| `OPENAI_BASE_URL` | No | Optional custom OpenAI-compatible base URL |
+| `OPENROUTER_API_KEY` | Yes | Used for chatbot replies and summarization |
+| `OPENROUTER_MODEL` | No | Defaults to `meta-llama/llama-3-8b-instruct` |
+| `OPENROUTER_HTTP_REFERER` | No | Optional site URL sent to OpenRouter |
+| `OPENROUTER_APP_NAME` | No | Optional app name sent as `X-Title` |
 | `ZENROWS_API_KEY` | No | Improves website ingestion when crawling external pages |
 | `JWT_SECRET` | Yes | Signs widget session tokens |
 
 Notes:
 
-- The code reads `OPENAI_BASE_URL`. If you currently use `OPENAI_BASE_URI`, rename it.
+- The chatbot defaults to `meta-llama/llama-3-8b-instruct` unless `OPENROUTER_MODEL` is set.
 - Do not commit real secrets to source control.
 
 ## Local Development
@@ -165,7 +167,7 @@ npm run dev
 - `proxy.ts` is used for Clerk request protection in this Next.js 16 app.
 - The widget loader derives its origin from the script URL, so production embeds should load the script from your deployed domain.
 - The overview dashboard generates an origin-aware widget snippet. A separate dashboard component still contains a localhost example, so verify the copied embed code before sharing it externally.
-- Add your production Clerk URLs, database, OpenAI key, and `JWT_SECRET` before deploying.
+- Add your production Clerk URLs, database, OpenRouter key, and `JWT_SECRET` before deploying.
 - If website scraping quality matters, set `ZENROWS_API_KEY` in production.
 
 ## Operational Notes

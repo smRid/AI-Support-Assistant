@@ -5,7 +5,7 @@ import { conversation, knowledgeSources } from "@/db/schema";
 import { messages as messagesTable } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 import { countConversationTokens } from "@/lib/countConversationTokens";
-import { openai, summarizeConversation } from "@/lib/openAI";
+import { createChatCompletion, summarizeConversation } from "@/lib/openRouter";
 
 type PublicChatIncomingMessage = {
   role: string;
@@ -208,16 +208,11 @@ Escalation:
 Context:
 ${context}`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const reply = await createChatCompletion({
       messages: [{ role: "system", content: systemPrompt }, ...messages],
-      temperature: 0.7,
-      max_tokens: 200,
+      temperature: 0.5,
+      maxTokens: 200,
     });
-
-    const reply =
-      completion.choices[0].message.content ||
-      "I'm sorry, I couldn't generate a response.";
 
     try {
       await db.insert(messagesTable).values({
@@ -231,7 +226,7 @@ ${context}`;
 
     return NextResponse.json({ response: reply });
   } catch (error) {
-    console.error("OpenAI Error:", error);
+    console.error("OpenRouter Error:", error);
     return NextResponse.json(
       { error: "Failed to generate response" },
       { status: 500 }
