@@ -26,7 +26,7 @@ const SocialProof = () => {
                     <span className="text-2xl font-bold text-zinc-300">Initech</span>
                 </div>
                 <div className="flex items-center justify-center h-12">
-                    <span className="text-2xl font-bold text-zinc-300">Cyberdyne</span>
+                    <span className="text-2xl font-bold text-zinc-300">Northstar</span>
                 </div>
                 <div className="flex items-center justify-center h-12">
                     <span className="text-2xl font-bold text-zinc-300">Umbrella</span>

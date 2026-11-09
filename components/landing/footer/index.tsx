@@ -9,7 +9,7 @@ const Footer = () => {
                 <div className="w-6 h-6 rounded-md border border-white/20 flex items-center justify-center">
                     <div className="w-2.5 h-2.5 rounded-sm bg-white" />
                 </div>
-                <span className="text-sm font-medium text-white">OneMinute Support</span>
+                <span className="text-sm font-medium text-white">SupportAI</span>
             </div>
 
             {/* Center - Links */}

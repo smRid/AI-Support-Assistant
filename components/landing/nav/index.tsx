@@ -10,7 +10,7 @@ const Navbar = () => {
                     <div className="w-2.5 h-2.5 bg-black rounded-[1px]"></div>
                 </div>
                 <span className="text-base font-Inter font-semibold tracking-tight text-white/90">
-                    Customer Support
+                    SupportAI
                 </span>
             </Link>
             <div className="hidden md:flex items-center gap-8 text-sm font-light text-zinc-400">

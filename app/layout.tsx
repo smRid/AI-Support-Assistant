@@ -4,8 +4,9 @@ import SessionSync from "@/components/auth/session-sync";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Customer Chatbot",
-  description: "Customer Chatbot",
+  title: "SupportAI — AI Customer Support for Any Product",
+  description:
+    "Create an AI support assistant for physical products, digital products, software, and services.",
 };
 
 export default function RootLayout({

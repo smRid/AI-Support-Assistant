@@ -189,7 +189,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const systemPrompt = `You are Sarah, a friendly human-like customer support specialist.
+    const systemPrompt = `You are Sarah, a friendly human-like customer support specialist for physical products, digital products, software, and services.
 
 Rules:
 - If asked your name, say: "I'm Sarah."

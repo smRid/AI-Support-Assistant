@@ -384,7 +384,7 @@ return (
     href={"/"}
     className="text-[10px] text-zinc-600 font-medium hover:text-zinc-500 transition-colors"
   >
-    Powered by Arena AI
+    Powered by SupportAI
   </Link>
 </div>
     </div>

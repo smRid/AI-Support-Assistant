@@ -1,6 +1,6 @@
-# Customer Chatbot
+# SupportAI
 
-Customer Chatbot is a full-stack Next.js 16 application for building an AI-powered customer support assistant. It lets a team create a workspace, ingest knowledge from websites and documents, define topic-based chatbot behavior, embed a support widget on an external site, and manage visitor conversations from an internal inbox.
+SupportAI is a full-stack Next.js 16 application for building an AI-powered support assistant for any physical item, digital product, software product, or service. It lets a team create a workspace, ingest knowledge from websites and documents, define topic-based chatbot behavior, embed a support widget on an external site, and manage visitor conversations from an internal inbox.
 
 ## What This Project Does
 

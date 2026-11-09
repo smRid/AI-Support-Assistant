@@ -24,7 +24,7 @@ const Features = () => {
                     </div>
                     <h3 className="text-xl font-medium text-zinc-300 mb-3">Instant AI Responses</h3>
                     <p className="text-zinc-400 leading-relaxed">
-                        Deploy an AI agent that understands natural language and responds instantly to customer queries.
+                        Answer questions about products, orders, downloads, setup, policies, and services in natural language.
                     </p>
                 </div>
 
@@ -37,7 +37,7 @@ const Features = () => {
                     </div>
                     <h3 className="text-xl font-medium text-zinc-300 mb-3">No-Code Deployment</h3>
                     <p className="text-zinc-400 leading-relaxed">
-                        Go live in minutes without writing a single line of code. Our intuitive interface makes setup a breeze.
+                        Add your store, product catalog, documentation, or FAQs and go live without writing code.
                     </p>
                 </div>
 

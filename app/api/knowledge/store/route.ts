@@ -165,7 +165,6 @@ function isBoilerplateSegment(segment: string) {
   const containsBoilerplate = [
     "admission going on for",
     "trusted since 2012",
-    "bangladesh's #1 cyber security platfrom",
     "join our team",
     "our valued clients",
     "company statistics",
@@ -178,7 +177,6 @@ function isBoilerplateSegment(segment: string) {
     "copyright",
     "privacy policy",
     "terms",
-    "bug bounty",
     "help center",
     "students",
     "faq",

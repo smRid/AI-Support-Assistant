@@ -19,8 +19,8 @@ const Hero = () => {
                 <span className="text-zinc-500">powered by AI.</span>
             </h1>
             <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
-                Deploy an AI agent that understands your customers instantly.
-                No coding required. Go live in minutes.
+                Give customers instant answers about any physical item, digital
+                product, software, or service. No coding required.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -60,7 +60,7 @@ const Hero = () => {
                             <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                 <span className="text-sm font-medium text-zinc-300">
-                                Customer Support
+                                SupportAI
                                 </span>
                             </div>
                         </div>
@@ -95,7 +95,7 @@ const Hero = () => {
                             {/* User message */}
                             <div className="flex items-start gap-3 justify-end">
                                 <div className="px-4 py-2.5 rounded-2xl rounded-tr-sm text-sm leading-relaxed bg-zinc-800 text-zinc-100 w-fit max-w-xs shadow-sm">
-                                    I need some information about your product
+                                    Can you help me choose the right product?
                                 </div>
                                 <div className="w-9 h-9 rounded-full bg-zinc-700 shrink-0 mt-0.5 flex items-center justify-center">
                                     <svg className="w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -114,7 +114,7 @@ const Hero = () => {
                                     height={36}
                                 />
                                 <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm leading-relaxed bg-white text-zinc-900 w-fit max-w-sm shadow-sm">
-                                    Our AI-powered chatbot helps businesses deliver instant, 24/7 customer support with smart responses and seamless integrations.
+                                    Absolutely. Tell me what you need, and I can help with product details, compatibility, delivery, downloads, setup, or returns.
                                 </div>
                             </div>
                         </div>
